@@ -1,0 +1,2 @@
+include test.py example.py __init__.py
+include README.rst
