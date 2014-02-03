@@ -258,21 +258,26 @@ class TrieTestCase(unittest.TestCase):
     long_pair = (self.KeyFromKey(self._LONG_KEY), 42)
     none_pair = (None, None)
 
-    self.assertEquals(short_pair, t.FindShortestPrefix(self._VERY_LONG_KEY))
-    self.assertEquals(short_pair, t.FindShortestPrefix(self._LONG_KEY))
-    self.assertEquals(short_pair, t.FindShortestPrefix(self._LONG_PREFIXES[-1]))
-    self.assertEquals(short_pair, t.FindShortestPrefix(self._SHORT_KEY))
-    self.assertEquals(none_pair, t.FindShortestPrefix(self._SHORT_PREFIXES[-1]))
+    self.assertEquals(short_pair, t.shortest_prefix(self._VERY_LONG_KEY))
+    self.assertEquals(short_pair, t.shortest_prefix(self._LONG_KEY))
+    self.assertEquals(short_pair, t.shortest_prefix(self._VERY_LONG_KEY))
+    self.assertEquals(short_pair, t.shortest_prefix(self._LONG_PREFIXES[-1]))
+    self.assertEquals(short_pair, t.shortest_prefix(self._SHORT_KEY))
+    self.assertEquals(none_pair, t.shortest_prefix(self._SHORT_PREFIXES[-1]))
 
-    self.assertEquals(long_pair, t.FindLongestPrefix(self._VERY_LONG_KEY))
-    self.assertEquals(long_pair, t.FindLongestPrefix(self._LONG_KEY))
-    self.assertEquals(short_pair, t.FindShortestPrefix(self._LONG_PREFIXES[-1]))
-    self.assertEquals(short_pair, t.FindLongestPrefix(self._SHORT_KEY))
-    self.assertEquals(none_pair, t.FindShortestPrefix(self._SHORT_PREFIXES[-1]))
+    self.assertEquals(long_pair, t.longest_prefix(self._VERY_LONG_KEY))
+    self.assertEquals(long_pair, t.longest_prefix(self._LONG_KEY))
+    self.assertEquals(long_pair, t.longest_prefix(self._VERY_LONG_KEY))
+    self.assertEquals(short_pair, t.shortest_prefix(self._LONG_PREFIXES[-1]))
+    self.assertEquals(short_pair, t.longest_prefix(self._SHORT_KEY))
+    self.assertEquals(none_pair, t.shortest_prefix(self._SHORT_PREFIXES[-1]))
 
-    self.assertTrue(t.FindShortestPrefix(self._VERY_LONG_KEY))
-    self.assertTrue(t.FindLongestPrefix(self._VERY_LONG_KEY))
-    self.assertFalse(t.FindShortestPrefix(self._SHORT_PREFIXES[-1]))
+    self.assertEquals([], list(t.prefixes(self._SHORT_PREFIXES[-1])))
+    self.assertEquals([short_pair], list(t.prefixes(self._SHORT_KEY)))
+    self.assertEquals([short_pair], list(t.prefixes(self._LONG_PREFIXES[-1])))
+    self.assertEquals([short_pair, long_pair], list(t.prefixes(self._LONG_KEY)))
+    self.assertEquals([short_pair, long_pair],
+                      list(t.prefixes(self._VERY_LONG_KEY)))
 
   def testEquality(self):
     """Tests equality comparison."""

@@ -35,7 +35,7 @@ class _Node(object):
     self.children = {}
     self.value = _SENTINEL
 
-  def Iterate(self, path):
+  def iterate(self, path):
     """Yields all the nodes with values associated to them in the trie.
 
     Args:
@@ -49,7 +49,7 @@ class _Node(object):
     path.append(None)
     for step, node in sorted(self.children.iteritems()):
       path[-1] = step
-      for pair in node.Iterate(path):
+      for pair in node.iterate(path):
         yield pair
     path.pop()
 
@@ -123,7 +123,7 @@ class Trie(collections.MutableMapping):
       trie[key] = value
     return trie
 
-  def _GetNode(self, key, create=False):
+  def _get_node(self, key, create=False):
     """Returns node for given key.  Creates it if requested.
 
     Args:
@@ -140,7 +140,7 @@ class Trie(collections.MutableMapping):
     """
     node = self._root
     trace = [(None, node)]
-    for step in self.__PathFromKey(key):
+    for step in self.__path_from_key(key):
       if create:
         node = node.children.setdefault(step, _Node())
       else:
@@ -163,9 +163,9 @@ class Trie(collections.MutableMapping):
     Raises:
       KeyError: If prefix does not match any node.
     """
-    node, _ = self._GetNode(prefix)
-    for path, value in node.Iterate(list(self.__PathFromKey(prefix))):
-      yield (self._KeyFromPath(path), value)
+    node, _ = self._get_node(prefix)
+    for path, value in node.iterate(list(self.__path_from_key(prefix))):
+      yield (self._key_from_path(path), value)
 
   def iterkeys(self, prefix=_SENTINEL):
     """Yields all keys with associated values with given prefix.
@@ -190,8 +190,8 @@ class Trie(collections.MutableMapping):
     Raises:
       KeyError: If prefix does not match any node.
     """
-    node, _ = self._GetNode(prefix)
-    for _, value in node.Iterate(list(self.__PathFromKey(prefix))):
+    node, _ = self._get_node(prefix)
+    for _, value in node.iterate(list(self.__path_from_key(prefix))):
       yield value
 
   def keys(self, prefix=_SENTINEL):
@@ -233,7 +233,7 @@ class Trie(collections.MutableMapping):
       key respectively.
     """
     try:
-      node, _ = self._GetNode(key)
+      node, _ = self._get_node(key)
     except KeyError:
       return 0
     return ((self.HAS_VALUE * int(node.value is not _SENTINEL)) |
@@ -247,7 +247,7 @@ class Trie(collections.MutableMapping):
     """Returns whether given key is a prefix of another key in the trie."""
     return bool(self.has_node(key) & self.HAS_SUBTRIE)
 
-  def _SliceMaybe(self, key_or_slice):
+  def _slice_maybe(self, key_or_slice):
     """Checks whether argument is a slice or a plain key.
 
     Args:
@@ -281,14 +281,14 @@ class Trie(collections.MutableMapping):
         existing key.
       TypeError: If key_or_slice is a slice but it's stop or step are not None.
     """
-    if self._SliceMaybe(key_or_slice)[1]:
+    if self._slice_maybe(key_or_slice)[1]:
       return self.itervalues(key_or_slice.start)
-    node, _ = self._GetNode(key_or_slice)
+    node, _ = self._get_node(key_or_slice)
     if node.value is _SENTINEL:
       raise ShortKeyError(key_or_slice)
     return node.value
 
-  def _Set(self, key, value, only_if_missing=False, clear_children=False):
+  def _set(self, key, value, only_if_missing=False, clear_children=False):
     """Sets value for a given key.
 
     Args:
@@ -301,7 +301,7 @@ class Trie(collections.MutableMapping):
     Returns:
       Value of the node.
     """
-    node, _ = self._GetNode(key, create=True)
+    node, _ = self._get_node(key, create=True)
     if not only_if_missing or node.value is _SENTINEL:
       node.value = value
     if clear_children:
@@ -323,18 +323,18 @@ class Trie(collections.MutableMapping):
         existing key.
       TypeError: If key is a slice whose stop or step are not None.
     """
-    key, is_slice = self._SliceMaybe(key_or_slice)
-    self._Set(key, value, clear_children=is_slice)
+    key, is_slice = self._slice_maybe(key_or_slice)
+    self._set(key, value, clear_children=is_slice)
 
   def setdefault(self, key, value):
     """Sets value of a given node if not set already.  Returns it afterwards."""
-    return self._Set(key, value, only_if_missing=True)
+    return self._set(key, value, only_if_missing=True)
 
-  def _CleanupTrace(self, trace):
+  def _cleanup_trace(self, trace):
     """Removes empty nodes going on specified trace.
 
     Args:
-      trace: Trace to the node to cleanup as returned by _GetNode().
+      trace: Trace to the node to cleanup as returned by _get_node().
     """
     i = len(trace) - 1  # len(path) >= 1 since root is always there
     step, node = trace[i]
@@ -344,12 +344,12 @@ class Trie(collections.MutableMapping):
       del parent.children[step]
       step, node = parent_step, parent
 
-  def _PopFromNode(self, node, trace, default=_SENTINEL):
+  def _pop_from_node(self, node, trace, default=_SENTINEL):
     """Remove a value from given node.
 
     Args:
       node: Node to get value of.
-      trace: Trace to that node as returned by _GetNode().
+      trace: Trace to that node as returned by _get_node().
       default: A default value to return if node has no value set.
     Returns:
       Value of the node or default.
@@ -360,7 +360,7 @@ class Trie(collections.MutableMapping):
     if node.value is not _SENTINEL:
       value = node.value
       node.value = _SENTINEL
-      self._CleanupTrace(trace)
+      self._cleanup_trace(trace)
       return value
     elif default is _SENTINEL:
       raise ShortKeyError()
@@ -385,7 +385,7 @@ class Trie(collections.MutableMapping):
         associated with it nor is a prefix of an existing key.
     """
     try:
-      return self._PopFromNode(*self._GetNode(key))
+      return self._pop_from_node(*self._get_node(key))
     except KeyError:
       if default is not _SENTINEL:
         return default
@@ -407,8 +407,8 @@ class Trie(collections.MutableMapping):
       step = next(node.children.iterkeys())
       node = node.children[step]
       trace.append((step, node))
-    return (self._KeyFromPath((step for step, _ in trace[1:])),
-            self._PopFromNode(node, trace))
+    return (self._key_from_path((step for step, _ in trace[1:])),
+            self._pop_from_node(node, trace))
 
   def __delitem__(self, key_or_slice):
     """Deletes value associated with given key or raises KeyError.
@@ -424,30 +424,30 @@ class Trie(collections.MutableMapping):
         existing key.
       TypeError: If key is a slice whose stop or step are not None.
     """
-    key, is_slice = self._SliceMaybe(key_or_slice)
-    node, trace = self._GetNode(key)
+    key, is_slice = self._slice_maybe(key_or_slice)
+    node, trace = self._get_node(key)
     if is_slice:
       node.children.clear()
     elif node.value is _SENTINEL:
       raise ShortKeyError(key)
     node.value = _SENTINEL
-    self._CleanupTrace(trace)
+    self._cleanup_trace(trace)
 
-  def _WalkPath(self, key):
+  def prefixes(self, key):
     """Walks towards the node specified by key and yields all found values.
 
     Args:
       key: Key to look for.
     Yields:
-      (path, value) where path is a path to a node and value is value
-      associated with that node.
+      (k, value) pairs denoting keys with associated values encountered on the
+      way towards the specified key.
     """
     node = self._root
-    path = self.__PathFromKey(key)
+    path = self.__path_from_key(key)
     pos = 0
     while True:
       if node.value is not _SENTINEL:
-        yield (path[:pos], node.value)
+        yield self._key_from_path(path[:pos]), node.value
       if pos == len(path):
         break
       node = node.children.get(path[pos])
@@ -455,45 +455,34 @@ class Trie(collections.MutableMapping):
         break
       pos += 1
 
-  class FindPrefixResult(collections.namedtuple('FindPrefixResult',
-                                                'key value')):
-
-    def __nonzero__(self):
-      return self.key is not None
-
-  def FindShortestPrefix(self, key):
-    """Finds a shortest prefix of key with a value.
+  def shortest_prefix(self, key):
+    """Finds the shortest prefix of a key with a value.
 
     Args:
       key: Key to look for.
     Returns:
-      FindPrefixResult(k, value) where k is the shortest prefix of key (it may
-      be equal key) and value is value associated with that key.  If no node
-      is found, FindPrefixResult(None, None) is returned, which evaluates to
-      False in boolean context by the way.
+      (k, value) where k is the shortest prefix of key (it may be equal key)
+      and value is value associated with that key.  If no node is found,
+      (None, None) is returned.
     """
-    for path, value in self._WalkPath(key):
-      return self.FindPrefixResult(self._KeyFromPath(path), value)
-    return self.FindPrefixResult(None, None)
+    for ret in self.prefixes(key):
+      return ret
+    return (None, None)
 
-  def FindLongestPrefix(self, key):
-    """Finds a longest prefix of key with a value.
+  def longest_prefix(self, key):
+    """Finds the longest prefix of a key with a value.
 
     Args:
       key: Key to look for.
     Returns:
-      FindPrefixResult(k, value) where k is the longest prefix of key (it may
-      be equal key) and value is value associated with that key.  If no node
-      is found, FindPrefixResult(None, None) is returned, which evaluates to
-      False in boolean context by the way.
+      (k, value) where k is the longest prefix of key (it may be equal key)
+      and value is value associated with that key.  If no node is found,
+      (None, None) is returned.
     """
-    ret = None
-    for ret in self._WalkPath(key):
+    ret = (None, None)
+    for ret in self.prefixes(key):
       pass
-    if ret:
-      return self.FindPrefixResult(self._KeyFromPath(ret[0]), ret[1])
-    else:
-      return self.FindPrefixResult(None, None)
+    return ret
 
   def __eq__(self, other):
     return self._root == other._root  # pylint: disable=protected-access
@@ -512,7 +501,7 @@ class Trie(collections.MutableMapping):
     else:
       return 'Trie()'
 
-  def __PathFromKey(self, key):
+  def __path_from_key(self, key):
     """Converts a user visible key object to internal path representation.
 
     Args:
@@ -522,9 +511,9 @@ class Trie(collections.MutableMapping):
     Raises:
       TypeError: If key is of invalid type.
     """
-    return () if key is _SENTINEL else self._PathFromKey(key)
+    return () if key is _SENTINEL else self._path_from_key(key)
 
-  def _PathFromKey(self, key):
+  def _path_from_key(self, key):
     """Converts a user visible key object to internal path representation.
 
     The default implementation simply returns key.
@@ -538,7 +527,7 @@ class Trie(collections.MutableMapping):
     """
     return key
 
-  def _KeyFromPath(self, path):
+  def _key_from_path(self, path):
     """Converts an internal path into a user visible key object.
 
     The default implementation creates a tuple from the path.
@@ -559,7 +548,7 @@ class CharTrie(Trie):
   keys are returned as strings.
   """
 
-  def _KeyFromPath(self, path):
+  def _key_from_path(self, path):
     return ''.join(path)
 
 
@@ -595,8 +584,8 @@ class StringTrie(Trie):
       trie[key] = value
     return trie
 
-  def _PathFromKey(self, key):
+  def _path_from_key(self, key):
     return key.split(self._separator)
 
-  def _KeyFromPath(self, path):
+  def _key_from_path(self, path):
     return self._separator.join(path)

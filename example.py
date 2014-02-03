@@ -64,9 +64,9 @@ t['/foobar'] = lambda url: sys.stdout.write('FooBar handler: %s\n' % url)
 t['/baz'] = lambda url: sys.stdout.write('Baz handler: %s\n' % url)
 
 for url in ('/', '/foo', '/foot', '/foobar', 'invalid', '/foobarbaz', '/ba'):
-    handler = t.FindLongestPrefix(url)
-    if handler:
-        handler.value(url)
+    key, handler = t.longest_prefix(url)
+    if key is not None:
+        handler(url)
     else:
         print 'Unable to handle', repr(url)
 
