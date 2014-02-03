@@ -1,3 +1,4 @@
 *.pyc
 MANIFEST
 dist/
+RELEASE-VERSION

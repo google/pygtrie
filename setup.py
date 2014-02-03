@@ -1,11 +1,12 @@
 from distutils.core import setup
+import version
 
 with open('README.rst') as f:
     readme = f.read()
 
 setup(
     name='pytrie',
-    version='0.9',
+    version=version.getVersion(),
     description='Trie data structure implementation.',
     long_description=readme,
     author='Michal Nazarewicz',
