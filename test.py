@@ -229,6 +229,24 @@ class TrieTestCase(unittest.TestCase):
     self.assertEquals([long_key], sorted(t.keys(prefix=prefix)))
     self.assertEquals([long_key], sorted(t.iterkeys(prefix=prefix)))
 
+  def DoTestShallowIterator(self, trie_factory):
+    """Shallow iterator test."""
+    d = dict.fromkeys((self._SHORT_KEY, self._LONG_KEY), 42)
+    t = trie_factory(self._TRIE_CLS, d)
+
+    self.assertEquals([42], t.values(shallow=True))
+    self.assertEquals([42], list(t.itervalues(shallow=True)))
+
+    short_key = self.KeyFromKey(self._SHORT_KEY)
+    long_key = self.KeyFromKey(self._LONG_KEY)
+
+    expected_items = [(short_key, 42)]
+    self.assertEquals(expected_items, sorted(t.items(shallow=True)))
+    self.assertEquals(expected_items, sorted(t.iteritems(shallow=True)))
+
+    self.assertEquals([short_key], sorted(t.keys(shallow=True)))
+    self.assertEquals([short_key], sorted(t.iterkeys(shallow=True)))
+
   def DoTestSpliceOperations(self, trie_factory):
     """Splice trie operations tests."""
     d = dict.fromkeys((self._SHORT_KEY, self._LONG_KEY), 42)

@@ -35,21 +35,25 @@ class _Node(object):
     self.children = {}
     self.value = _SENTINEL
 
-  def iterate(self, path):
+  def iterate(self, path, shallow=False):
     """Yields all the nodes with values associated to them in the trie.
 
     Args:
       path: Path leading to this node.  Used to construct the key when
         returning value of this node and as a prefix for children.
+      shallow: Perform a shallow traversal, i.e. do not yield nodes if their
+        prefix has been yielded.
     Yields:
       (path, value) tuples.
     """
     if self.value is not _SENTINEL:
       yield path, self.value
+      if shallow:
+        return
     path.append(None)
     for step, node in sorted(self.children.iteritems()):
       path[-1] = step
-      for pair in node.iterate(path):
+      for pair in node.iterate(path, shallow=shallow):
         yield pair
     path.pop()
 
@@ -153,58 +157,66 @@ class Trie(collections.MutableMapping):
   def __iter__(self):
     return self.iterkeys()
 
-  def iteritems(self, prefix=_SENTINEL):
+  def iteritems(self, prefix=_SENTINEL, shallow=False):
     """Yields all nodes with associated values with given prefix.
 
     Args:
       prefix: Prefix to limit iteration to.
+      shallow: Perform a shallow traversal, i.e. do not yield items if their
+        prefix has been yielded.
     Yields:
       (key, value) tuples.
     Raises:
       KeyError: If prefix does not match any node.
     """
     node, _ = self._get_node(prefix)
-    for path, value in node.iterate(list(self.__path_from_key(prefix))):
+    for path, value in node.iterate(list(self.__path_from_key(prefix)),
+                                    shallow=shallow):
       yield (self._key_from_path(path), value)
 
-  def iterkeys(self, prefix=_SENTINEL):
+  def iterkeys(self, prefix=_SENTINEL, shallow=False):
     """Yields all keys with associated values with given prefix.
 
     Args:
       prefix: Prefix to limit iteration to.
+      shallow: Perform a shallow traversal, i.e. do not yield keys if their
+        prefix has been yielded.
     Yields:
       All the keys (with given prefix) with associated values in the trie.
     Raises:
       KeyError: If prefix does not match any node.
     """
-    for key, _ in self.iteritems(prefix=prefix):
+    for key, _ in self.iteritems(prefix=prefix, shallow=shallow):
       yield key
 
-  def itervalues(self, prefix=_SENTINEL):
+  def itervalues(self, prefix=_SENTINEL, shallow=False):
     """Yields all values associates with keys with given prefix.
 
     Args:
       prefix: Prefix to limit iteration to.
+      shallow: Perform a shallow traversal, i.e. do not yield values if their
+        prefix has been yielded.
     Yields:
       All the values associated with keys (with given prefix) in the trie.
     Raises:
       KeyError: If prefix does not match any node.
     """
     node, _ = self._get_node(prefix)
-    for _, value in node.iterate(list(self.__path_from_key(prefix))):
+    for _, value in node.iterate(list(self.__path_from_key(prefix)),
+                                 shallow=shallow):
       yield value
 
-  def keys(self, prefix=_SENTINEL):
+  def keys(self, prefix=_SENTINEL, shallow=False):
     """Returns a list of all the keys, with given prefix, in the trie."""
-    return list(self.iterkeys(prefix=prefix))
+    return list(self.iterkeys(prefix=prefix, shallow=shallow))
 
-  def values(self, prefix=_SENTINEL):
+  def values(self, prefix=_SENTINEL, shallow=False):
     """Returns a list of values in given subtrie."""
-    return list(self.itervalues(prefix=prefix))
+    return list(self.itervalues(prefix=prefix, shallow=shallow))
 
-  def items(self, prefix=_SENTINEL):
+  def items(self, prefix=_SENTINEL, shallow=False):
     """Returns a list of (key, value) pairs in given subtrie."""
-    return list(self.iteritems(prefix=prefix))
+    return list(self.iteritems(prefix=prefix, shallow=shallow))
 
   def __len__(self):
     """Returns number of values in a trie.
