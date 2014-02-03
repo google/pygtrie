@@ -5,7 +5,7 @@ with open('README.rst') as f:
     readme = f.read()
 
 setup(
-    name='pytrie',
+    name='pygtrie',
     version=version.getVersion(),
     description='Trie data structure implementation.',
     long_description=readme,
