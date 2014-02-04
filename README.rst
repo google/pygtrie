@@ -30,6 +30,15 @@ Features
 
 - Can store any value including None.
 
+Installation
+------------
+
+To install bz2file, run::
+
+    pip install pygtrie
+
+Or download the sources and save ``trie.py`` file with your project.
+
 Version History
 ---------------
 
