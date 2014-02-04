@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """A Python trie implementation.
 
 The module contains Trie, CharTrie and StringTrie classes which implement the
@@ -5,6 +6,10 @@ trie data structure (see <http://en.wikipedia.org/wiki/Trie>).  The classes
 implement a mutable mapping interface (or in other words interface of
 a dictionary) with some additional functionality related to being able to
 operate keys with given prefix.
+
+The module also contains PrefixSet class which uses a trie to store a set of
+prefixes such that a key is contained in the set if it or its prefix is stored
+in the set.
 
 For some simple examples see example.py file.
 """
@@ -601,3 +606,128 @@ class StringTrie(Trie):
 
   def _key_from_path(self, path):
     return self._separator.join(path)
+
+
+class PrefixSet(collections.MutableSet):
+  """A set of prefixes.
+
+  PrefixSet works similar to a normal set except it is said to contain a key
+  if the key or it's prefix is stored in the set.  For instance, if "foo" is
+  added to the set, the set contains "foo" as well as "foobar".
+
+  The set supports addition of elements but does not support removal of
+  elements.  This is because there's no obvious consistent and intuitive
+  behaviour for element deletion.
+  """
+
+  def __init__(self, iterable=None, trie_factory=Trie, **kwargs):
+    """Initialises the prefix set.
+
+    Args:
+      iterable: A sequence of keys to add to the set.
+      trie_factory: A function used to create a trie used by the PrefixSet.
+      kwargs: Additional keyword arguments passed to the trie_factory function.
+    """
+    trie = trie_factory(**kwargs)
+    if iterable:
+      trie.update((key, True) for key in iterable)
+    self._trie = trie
+
+  def copy(self):
+    """Returns a copy of the prefix set."""
+    return self.__class__(self._trie)
+
+  def clear(self):
+    """Removes all keys from the set."""
+    self._trie.clear()
+
+  def __contains__(self, key):
+    """Checks whether set contains key or its prefix."""
+    return bool(self._trie.shortest_prefix(key)[1])
+
+  def __iter__(self):
+    """Return iterator over all prefixes in the set.
+
+    See iter() method for more info.
+    """
+    return self._trie.iterkeys()
+
+  def iter(self, prefix=_SENTINEL):
+    """Iterates over all keys in the set optionally starting with a prefix.
+
+    Since a key does not have to be explicitly added to the set to be an
+    element of the set, this method does not iterate over all possible keys
+    that the set contains, but only over the shortest set of prefixes of all
+    the keys the set contains.
+
+    For example, if "foo" has been added to the set, the set contains also
+    "foobar", but this method will *not* iterate over "foobar" but only over
+    "foo".
+
+    If prefix argument is specified, method will iterate over keys with given
+    prefix only.  The keys yielded from the function if prefix is given does
+    not have to be a subset (in mathematical sense) of the keys yielded when
+    there is not subset.  This happens, if the set contains a prefix of the
+    given prefix.
+
+    For example, if only "foo" has been added to the set, iter method called
+    with no arguments will yield "foo" only.  However, when called with
+    "foobar" argument, it will yield "foobar" only.
+    """
+    if prefix is _SENTINEL:
+      return iter(self)
+    elif self._trie.has_node(prefix):
+      return self._trie.iterkeys(prefix=prefix)
+    elif prefix in self:
+      # Make sure the type of returned keys is consistent.
+      return (self._trie._key_from_path(self._trie._path_from_key(prefix)),)
+    else:
+      return ()
+
+  def __len__(self):
+    """Returns number of keys stored in the set.
+
+    Since a key does not have to be explicitly added to the set to be an
+    element of the set, this method does not count over all possible keys that
+    the set contains (since that would be infinity), but only over the
+    shortest set of prefixes of all the keys the set contains.
+
+    For example, if "foo" has been added to the set, the set contains also
+    "foobar", but this method will *not* count over "foobar" but only "foo".
+    """
+    return len(self._trie)
+
+  def add(self, key):
+    """Adds given key to the set.
+
+    If the set already contains prefix of the key being added, this operation
+    has no effect.  If the key being added is a prefix of some existing keys
+    in the set, those keys are deleted and replaced by a single entry for the
+    key being added.
+
+    For example, if the set contains key "foo" adding a key "foobar" does not
+    change anything.  On the other hand, if the set contains keys "foobar" and
+    "foobaz", adding a key "foo" will replace those two keys with a single key
+    "foo".
+
+    This makes a difference when iterating over the keys or counting number of
+    the keys.  Counter intuitively, adding of a key can *decrease* length of
+    the set.
+
+    Args:
+      key: Key to add.
+    """
+    if key not in self:
+      self._trie[key:] = True
+
+  def discard(self, key):
+    raise NotImplementedError(
+      'Removing keys from PrefixSet is not implemented.')
+
+  def remove(self, key):
+    raise NotImplementedError(
+      'Removing keys from PrefixSet is not implemented.')
+
+  def pop(self):
+    raise NotImplementedError(
+      'Removing keys from PrefixSet is not implemented.')

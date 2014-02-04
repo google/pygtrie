@@ -1,4 +1,4 @@
-pytrie is a Python library implementing a trie data structure.
+pygtrie is a Python library implementing a trie data structure.
 
 Trie data structure, also known as radix or prefix tree, is an ordered
 tree associating keys to values where all the descendants of a node
@@ -9,6 +9,10 @@ implementing a mutable mapping interface, i.e. interface of the
 dictionary.  As such, in most circumstances, Trie could be used as
 a drop-in replacement for a dict.  Obviously the prefix nature of the
 data structure is what gives it its strengths.
+
+The module also contains PrefixSet class which uses a trie to store
+a set of prefixes such that a key is contained in the set if it or its
+prefix is stored in the set.
 
 Features
 --------
@@ -22,8 +26,16 @@ Features
 
 - Extensible for any kind of user-defined keys.
 
+- A PrefixSet supports “all keys starting with given prefix” logic.
+
+- Can store any value including None.
+
 Version History
 ---------------
+
+0.9.1: 2014/02/03
+
+- New name.
 
 0.9: 2014/02/03
 
