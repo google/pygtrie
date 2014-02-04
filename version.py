@@ -11,7 +11,7 @@ format:
 
 If “git describe” returns an error (likely because we're in an unpacked copy
 of a release tarball, rather than a git working copy), or returns a tag that
-does not match the above format, version is read from RELEASE-VERSION file.
+does not match the above format, version is read from .version file.
 
 To use this script, simply import it your setup.py file, and use the results
 of getVersion() as your package version:
@@ -24,12 +24,12 @@ of getVersion() as your package version:
         .
     )
 
-This will automatically update the RELEASE-VERSION file.  The RELEASE-VERSION
-file should *not* be checked into git but it *should* be included in sdist
-tarballs (as should version.py file).  To do this, run:
+This will automatically update the .version file.  The .version file should
+*not* be checked into git but it *should* be included in sdist tarballs (as
+should version.py file).  To do this, run:
 
-    echo include RELEASE-VERSION version.py >>MANIFEST.in
-    echo RELEASE-VERSION >>.gitignore
+    echo include .version version.py >>MANIFEST.in
+    echo .version >>.gitignore
 
 With that setup, a new release can be labelled by simply invoking:
 
@@ -50,7 +50,7 @@ import subprocess
 import sys
 
 
-RELEASE_VERSION_FILE = 'RELEASE-VERSION'
+RELEASE_VERSION_FILE = '.version'
 
 # http://www.python.org/dev/peps/pep-0386/
 _PEP386_SHORT_VERSION_RE = r'\d+(?:\.\d+)+(?:(?:[abc]|rc)\d+(?:\.\d+)*)?'

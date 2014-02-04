@@ -1,5 +1,5 @@
 *.pyc
+.version
 MANIFEST
-RELEASE-VERSION
 build/
 dist/
