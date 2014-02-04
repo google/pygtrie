@@ -95,6 +95,24 @@ except ImportError:
 
 
 print
+print 'Prefix set'
+print '=========='
+print
+
+ps = trie.PrefixSet(factory=trie.StringTrie)
+
+ps.add('/etc/rc.d')
+ps.add('/usr/local/share')
+ps.add('/usr/local/lib')
+ps.add('/usr')  # Will handle the above two as well
+ps.add('/usr/lib')  # Does not change anything
+
+print 'Path prefixes:', ', '.join(iter(ps))
+for path in ('/etc', '/etc/rc.d', '/usr', '/usr/local', '/usr/local/lib'):
+    print 'Is', path, 'in the set:', ('yes' if path in ps else 'no')
+
+
+print
 print 'Dictionary test'
 print '==============='
 print

@@ -620,15 +620,15 @@ class PrefixSet(collections.MutableSet):
   behaviour for element deletion.
   """
 
-  def __init__(self, iterable=None, trie_factory=Trie, **kwargs):
+  def __init__(self, iterable=None, factory=Trie, **kwargs):
     """Initialises the prefix set.
 
     Args:
       iterable: A sequence of keys to add to the set.
-      trie_factory: A function used to create a trie used by the PrefixSet.
-      kwargs: Additional keyword arguments passed to the trie_factory function.
+      factory: A function used to create a trie used by the PrefixSet.
+      kwargs: Additional keyword arguments passed to the factory function.
     """
-    trie = trie_factory(**kwargs)
+    trie = factory(**kwargs)
     if iterable:
       trie.update((key, True) for key in iterable)
     self._trie = trie

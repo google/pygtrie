@@ -299,7 +299,7 @@ class TrieTestCase(unittest.TestCase):
 
   def testPrefixSet(self):
     """PrefixSet test."""
-    ps = trie.PrefixSet(trie_factory=self._TRIE_CLS)
+    ps = trie.PrefixSet(factory=self._TRIE_CLS)
 
     short_key = self.KeyFromKey(self._SHORT_KEY)
     long_key = self.KeyFromKey(self._LONG_KEY)
