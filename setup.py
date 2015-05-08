@@ -14,6 +14,7 @@ if len(sys.argv) == 2 and sys.argv[1] == 'builddoc':
 
 with open('README.rst') as f:
     readme = f.read()
+    readme = re.sub(r':class:`(?:trie\.)?([^`]*)`', r'``\1``', readme)
 with open('version-history.rst') as f:
     readme += '\n' + f.read()
 
