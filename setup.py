@@ -1,8 +1,22 @@
 from distutils.core import setup
+import os
 import version
+import sys
+
+
+if len(sys.argv) == 2 and sys.argv[1] == 'builddoc':
+    release = version.getVersion()
+    os.execlp('sphinx-build',
+              '-Drelease=' + release,
+              '-Dversion=' + '.'.join(release.split('.', 2)[0:2]),
+              '.', 'html')
+
 
 with open('README.rst') as f:
     readme = f.read()
+with open('version-history.rst') as f:
+    readme += '\n' + f.read()
+
 
 setup(
     name='pygtrie',
