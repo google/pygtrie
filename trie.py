@@ -1,17 +1,37 @@
 # -*- coding: utf-8 -*-
-"""A Python trie implementation.
+"""Implementation of a trie data structure.
 
-The module contains :class:`trie.Trie`, :class:`trie.CharTrie` and
-:class:`trie.StringTrie` classes which implement `the trie data structure
-<http://en.wikipedia.org/wiki/Trie>`.  The classes implement a mutable mapping
-interface (or in other words interface of a dictionary) with some additional
-functionality related to being able to operate keys with given prefix.
+`Trie data structure <http://en.wikipedia.org/wiki/Trie>`, also known as radix
+or prefix tree, is a tree associating keys to values where all the descendants
+of a node have a common prefix (associated with that node).
 
-The module also contains PrefixSet class which uses a trie to store a set of
-prefixes such that a key is contained in the set if it or its prefix is stored
-in the set.
+The trie module contains :class:`trie.Trie`, :class:`trie.CharTrie` and
+:class:`trie.StringTrie` classes each implementing a mutable mapping interface,
+i.e. :class:`dict` interface.  As such, in most circumstances,
+:class:`trie.Trie` could be used as a drop-in replacement for a :class:`dict`,
+but the prefix nature of the data structure is trie’s real strength.
 
-For some simple examples see example.py file.
+The module also contains :class:`trie.PrefixSet` class which uses a trie to
+store a set of prefixes such that a key is contained in the set if it or its
+prefix is stored in the set.
+
+Features
+--------
+
+- A full mutable mapping implementation.
+
+- Supports iterating over as well as deleting a subtrie.
+
+- Supports prefix checking as well as shortest and longest prefix
+  look-up.
+
+- Extensible for any kind of user-defined keys.
+
+- A PrefixSet supports “all keys starting with given prefix” logic.
+
+- Can store any value including None.
+
+For some simple examples see ``example.py`` file.
 """
 
 __author__ = 'Michal Nazarewicz <mina86@mina86.com>'

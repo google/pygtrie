@@ -1,4 +1,16 @@
-.. include:: README.rst
+pygtrie
+=======
+
+.. automodule:: trie
+
+Installation
+------------
+
+To install bz2file, run::
+
+    pip install pygtrie
+
+Or download the sources and save ``trie.py`` file with your project.
 
 Trie classes
 ------------

@@ -1,6 +1,10 @@
 Version History
 ---------------
 
+0.9.3: 2015/05/28
+
+- Minor documentation fixes.
+
 0.9.2: 2015/05/28
 
 - Added Sphinx configuration and updated docstrings to work better
