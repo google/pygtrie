@@ -1,6 +1,14 @@
 pygtrie
 =======
 
+.. image:: https://readthedocs.org/projects/pygtrie/badge/?version=latest
+   :target: http://pygtrie.readthedocs.org/en/latest/
+   :alt: Documentation Status (latest)
+
+.. image:: https://readthedocs.org/projects/pygtrie/badge/?version=stable
+   :target: http://pygtrie.readthedocs.org/en/stable/
+   :alt: Documentation Status (stable)
+
 pygtrie is a Python library implementing a trie data structure.
 
 `Trie data structure <http://en.wikipedia.org/wiki/Trie>`_, also known
