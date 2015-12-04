@@ -45,7 +45,7 @@ Features
 Installation
 ------------
 
-To install bz2file, run::
+To install pygtrie, run::
 
     pip install pygtrie
 
