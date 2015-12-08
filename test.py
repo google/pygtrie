@@ -389,5 +389,47 @@ class StringTrieTestCase(TrieTestCase):
     return '/'.join(path)
 
 
+_SENTINEL = object()
+
+
+class TestNode(object):
+
+  def __init__(self, key, children, value=_SENTINEL):
+    self.key = key
+    self.value = value
+    self.children = children
+
+
+def make_test_node(path_conv, path, children, value=_SENTINEL):
+    return TestNode(path_conv(path), [c for c in children], value)
+
+
+def make_test_node_and_compress(path_conv, path, children, value=_SENTINEL):
+  k = path_conv(path)
+  evaluated_children = [x for x in children]
+  if value is not _SENTINEL:
+    return TestNode(k, evaluated_children, value)
+  elif len(evaluated_children) == 1:
+    # There is only one prefix.
+    return evaluated_children[0]
+  else:
+    return TestNode(k, evaluated_children, value)
+
+
+class TraverseTest(unittest.TestCase):
+
+  def testTraverse(self):
+    t = trie.CharTrie()
+    t.update({'aaaaa': 1, 'aaaab': 2, 'aaaac': 3})
+
+    x = t.traverse(make_test_node)
+    self.assertEquals('', x.key)
+    self.assertEquals(1, len(x.children))
+
+    y = t.traverse(make_test_node_and_compress)
+    self.assertEquals('aaaa', y.key)
+    self.assertEquals(3, len(y.children))
+    self.assertEquals(1, y.children[0].value)
+
 if __name__ == '__main__':
   unittest.main()

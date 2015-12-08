@@ -83,6 +83,33 @@ class _Node(object):
         yield pair
     path.pop()
 
+  def traverse(self, node_factory, path_conv, path):
+    """Traverses the node and returns another type of node from node_factory.
+
+    Args:
+      node_factory: Object for constructing new nodes
+      path_conv: Callable function to convert node path to a key
+      path: Current path for this node
+
+    Returns:
+      An object constructed by
+      node_factory.MakeNode(path_conv, path, children, value=...) where
+      children are constructed by node_factory from the childred of this node.
+      There doesn't need to be 1:1 correspondence between original nodes in the
+      trie and constructed nodes (see TestNodeCompressingFactory in
+      trie_test.py)
+    """
+    def children():
+      path.append(None)
+      for step, node in sorted(self.children.iteritems()):
+        path[-1] = step
+        yield node.traverse(node_factory, path_conv, path)
+
+    args = [path_conv, tuple(path), children()]
+    if self.value is not _SENTINEL:
+      args.append(self.value)
+    return node_factory(*args)
+
   def __eq__(self, other):
     return self.value == other.value and self.children == other.children
 
@@ -615,6 +642,25 @@ class Trie(collections.MutableMapping):
     """
     return tuple(path)
 
+  def traverse(self, node_factory, prefix=_SENTINEL):
+    """Traverses the tree using node_factory object.
+
+    node_factory must have method MakeNode(path_conv, path, children, value=...)
+    where path_conv is a lambda converting path representation to key
+    path is the path to this node
+    children is a list of children nodes constructed by MakeNode
+    optional value is the value associated with the path.
+
+    Args:
+      node_factory: Makes opaque objects from the keys and values of the trie.
+      prefix: Prefix for node to start traversal, by default starts at root.
+
+    Returns:
+      Node object constructed by node_factory corresponding to the root node.
+    """
+    node, _ = self._get_node(prefix)
+    return node.traverse(node_factory, self._key_from_path,
+                         list(self.__path_from_key(prefix)))
 
 class CharTrie(Trie):
   """A variant of a :class:`trie.Trie` which accepts strings as keys.
