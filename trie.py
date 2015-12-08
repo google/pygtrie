@@ -83,6 +83,32 @@ class _Node(object):
         yield pair
     path.pop()
 
+  def traverse(self, node_factory, path_conv, path):
+    """Traverses the node and returns another type of node from node_factory.
+
+    Args:
+      node_factory: Callable function to construct new nodes.
+      path_conv: Callable function to convert node path to a key.
+      path: Current path for this node.
+
+    Returns:
+      An object constructed by calling node_factory(path_conv, path, children,
+      value=...), where children are constructed by node_factory from the
+      children of this node. There doesn't need to be 1:1 correspondence between
+      original nodes in the trie and constructed nodes (see
+      make_test_node_and_compress in test.py).
+    """
+    def children():
+      for step, node in sorted(self.children.iteritems()):
+        yield node.traverse(node_factory, path_conv, path + [step])
+
+    args = [path_conv, tuple(path), children()]
+
+    if self.value is not _SENTINEL:
+      args.append(self.value)
+
+    return node_factory(*args)
+
   def __eq__(self, other):
     return self.value == other.value and self.children == other.children
 
@@ -615,6 +641,37 @@ class Trie(collections.MutableMapping):
     """
     return tuple(path)
 
+  def traverse(self, node_factory, prefix=_SENTINEL):
+    """Traverses the tree using node_factory object.
+
+    node_factory is a callable function which accepts (path_conv, path,
+    children, value=...) arguments, where path_conv is a lambda converting path
+    representation to key, path is the path to this node, children is an
+    iterable of children nodes constructed by node_factory, optional value is
+    the value associated with the path.
+
+    Note: node_factory's children argument is a generator which has a few
+    consequences:
+    * To traverse into node's children, the generator must be iterated over.
+      This can by accomplished by a simple "children = list(children)"
+      statement.
+    * Ignoring the argument allows node_factory to stop the traversal from going
+      into the children of the node.  In other words, whole subtrie can be
+      removed from traversal if node_factory chooses so.
+    * If children is stored as is (i.e. as a generator) when it is iterated over
+      later on it will see state of the trie as it is during the iteration and
+      not when traverse method was called.
+
+    Args:
+      node_factory: Makes opaque objects from the keys and values of the trie.
+      prefix: Prefix for node to start traversal, by default starts at root.
+
+    Returns:
+      Node object constructed by node_factory corresponding to the root node.
+    """
+    node, _ = self._get_node(prefix)
+    return node.traverse(node_factory, self._key_from_path,
+                         list(self.__path_from_key(prefix)))
 
 class CharTrie(Trie):
   """A variant of a :class:`trie.Trie` which accepts strings as keys.

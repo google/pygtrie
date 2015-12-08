@@ -6,6 +6,7 @@ __author__     = 'Michal Nazarewicz <mina86@mina86.com>'
 __copyright__  = 'Copyright 2014 Google Inc.'
 
 
+import collections
 import functools
 import types
 import unittest
@@ -387,6 +388,111 @@ class StringTrieTestCase(TrieTestCase):
 
   def KeyFromPath(self, path):
     return '/'.join(path)
+
+
+
+class TraverseTest(unittest.TestCase):
+
+  _SENTINEL = object()
+  _TestNode = collections.namedtuple('TestNode', 'key children value')
+
+  @classmethod
+  def _make_test_node(cls, path_conv, path, children, value=_SENTINEL):
+    return cls._TestNode(path_conv(path), list(children), value)
+
+  def assertNode(self, node, key, children=0, value=_SENTINEL):
+    self.assertTrue(node)
+    self.assertEquals(key, node.key)
+    self.assertEquals(children, len(node.children))
+    self.assertEquals(value, node.value)
+    return node
+
+  def testTraverseEmptyTree(self):
+    t = trie.CharTrie()
+    r = t.traverse(self._make_test_node)
+    self.assertNode(r, '', 0)
+
+  def testTraverseSingletonTree(self):
+    t = trie.CharTrie()
+    t.update({'a': 10})
+
+    r = t.traverse(self._make_test_node)
+    self.assertNode(r, '', 1)
+    self.assertNode(r.children[0], 'a', 0, 10)
+
+  def testTraverse(self):
+    t = trie.CharTrie()
+    t.update({'aaa': 1, 'aab': 2, 'aac': 3, 'bb': 4})
+
+    r = t.traverse(self._make_test_node)
+    # Result:
+    #  <>
+    #    a
+    #      aa
+    #        aaa:1
+    #        aab:2
+    #        aac:3
+    #    b
+    #      bb:4
+    self.assertNode(r, '', 2)
+
+    a_node = self.assertNode(r.children[0], 'a', 1)
+    aa_node = self.assertNode(a_node.children[0], 'aa', 3)
+    self.assertNode(aa_node.children[0], 'aaa', 0, 1)
+    self.assertNode(aa_node.children[2], 'aac', 0, 3)
+
+    b_node = self.assertNode(r.children[1], 'b', 1)
+    self.assertNode(b_node.children[0], 'bb', 0, 4)
+
+  def testTraverseCompressing(self):
+    t = trie.CharTrie()
+    t.update({'aaa': 1, 'aab': 2, 'aac': 3, 'bb': 4})
+
+    def make(path_conv, path, children, value=self._SENTINEL):
+      children = list(children)
+      if value is self._SENTINEL and len(children) == 1:
+        # There is only one prefix.
+        return children[0]
+      else:
+        return self._TestNode(path_conv(path), children, value)
+
+    r = t.traverse(make)
+    # Result:
+    # <>
+    #  aa
+    #    aaa:1
+    #    aab:2
+    #    aac:3
+    #  bb:4
+    self.assertNode(r, '', 2)
+
+    aa_node = self.assertNode(r.children[0], 'aa', 3)
+    self.assertNode(aa_node.children[0], 'aaa', 0, 1)
+    self.assertNode(aa_node.children[1], 'aab', 0, 2)
+    self.assertNode(aa_node.children[2], 'aac', 0, 3)
+
+    self.assertNode(r.children[1], 'bb', 0, 4)
+
+  def testTraverseIgnoreSubtrie(self):
+    t = trie.CharTrie()
+    t.update({'aaa': 1, 'aab': 2, 'aac': 3, 'b': 4})
+
+    cnt = [0]
+
+    def make(path_conv, path, children, value=self._SENTINEL):
+      cnt[0] += 1
+      if path and path[0] == 'a':
+        return None
+      else:
+        return self._TestNode(path_conv(path), filter(None, children), value)
+
+    r = t.traverse(make)
+    # Result:
+    # <>
+    #  b:4
+    self.assertNode(r, '', 1)
+    self.assertNode(r.children[0], 'b', 0, 4)
+    self.assertEquals(3, cnt[0])
 
 
 if __name__ == '__main__':
