@@ -389,5 +389,138 @@ class StringTrieTestCase(TrieTestCase):
     return '/'.join(path)
 
 
+_SENTINEL = object()
+
+
+class TestNode(object):
+
+  def __init__(self, key, children, value=_SENTINEL):
+    self.key = key
+    self.value = value
+    self.children = children
+
+
+def make_test_node(path_conv, path, children, value=_SENTINEL):
+    return TestNode(path_conv(path), [c for c in children], value)
+
+
+def make_test_node_and_compress(path_conv, path, children, value=_SENTINEL):
+  k = path_conv(path)
+  evaluated_children = [x for x in children]
+  if value is not _SENTINEL:
+    return TestNode(k, evaluated_children, value)
+  elif len(evaluated_children) == 1:
+    # There is only one prefix.
+    return evaluated_children[0]
+  else:
+    return TestNode(k, evaluated_children, value)
+
+
+class TraverseTest(unittest.TestCase):
+
+  def testTraverseEmptyTree(self):
+    t = trie.CharTrie()
+    r = t.traverse(make_test_node)
+    self.assertTrue(r)
+    self.assertFalse(r.children)
+    self.assertEquals('', r.key)
+    self.assertEquals(_SENTINEL, r.value)
+
+  def testTraverseSingletonTree(self):
+    t = trie.CharTrie()
+    t.update({'a': 10})
+
+    r = t.traverse(make_test_node)
+    self.assertTrue(r)
+    self.assertEquals(1, len(r.children))
+    self.assertEquals('', r.key)
+    self.assertEquals(_SENTINEL, r.value)
+
+    self.assertEquals('a', r.children[0].key)
+    self.assertEquals(10, r.children[0].value)
+    self.assertFalse(r.children[0].children)
+
+  def testTraverse(self):
+    t = trie.CharTrie()
+    t.update({'aaa': 1, 'aab': 2, 'aac': 3, 'bb': 4})
+
+    r = t.traverse(make_test_node)
+    # Result
+    #  <>
+    #    a
+    #      aa
+    #        aaa:1
+    #        aab:2
+    #        aac:3
+    #    b
+    #      bb:4
+    self.assertEquals('', r.key)
+    self.assertEquals(2, len(r.children))
+    a_node = r.children[0]
+
+    self.assertEquals('a', a_node.key)
+    self.assertEquals(_SENTINEL, a_node.value)
+    self.assertEquals(1, len(a_node.children))
+
+    b_node = r.children[1]
+    self.assertEquals('b', b_node.key)
+    self.assertEquals(_SENTINEL, b_node.value)
+    self.assertEquals(1, len(b_node.children))
+
+    aa_node = a_node.children[0]
+    self.assertEquals('aa', aa_node.key)
+    self.assertEquals(_SENTINEL, aa_node.value)
+    self.assertEquals(3, len(aa_node.children))
+
+    aaa_node = aa_node.children[0]
+    self.assertEquals('aaa', aaa_node.key)
+    self.assertEquals(1, aaa_node.value)
+    self.assertFalse(aaa_node.children)
+
+    aac_node = aa_node.children[2]
+    self.assertEquals('aac', aac_node.key)
+    self.assertEquals(3, aac_node.value)
+    self.assertFalse(aac_node.children)
+
+    bb_node = b_node.children[0]
+    self.assertEquals('bb', bb_node.key)
+    self.assertEquals(4, bb_node.value)
+    self.assertFalse(bb_node.children)
+
+  def testTraverseCompressing(self):
+    t = trie.CharTrie()
+    t.update({'aaa': 1, 'aab': 2, 'aac': 3, 'bb': 4})
+    r = t.traverse(make_test_node_and_compress)
+    # Result
+    # <>
+    #  aa
+    #    aaa:1
+    #    aab:2
+    #    aac:3
+    #  bb:4
+    self.assertEquals('', r.key)
+    self.assertEquals(2, len(r.children))
+
+    aa_node = r.children[0]
+    self.assertEquals('aa', aa_node.key)
+    self.assertEquals(_SENTINEL, aa_node.value)
+    self.assertEquals(3, len(aa_node.children))
+
+    aaa_node = aa_node.children[0]
+    self.assertEquals('aaa', aaa_node.key)
+    self.assertEquals(1, aaa_node.value)
+    self.assertFalse(aaa_node.children)
+
+    aac_node = aa_node.children[2]
+    self.assertEquals('aac', aac_node.key)
+    self.assertEquals(3, aac_node.value)
+    self.assertFalse(aac_node.children)
+
+    bb_node = r.children[1]
+    self.assertEquals('bb', bb_node.key)
+    self.assertEquals(4, bb_node.value)
+    self.assertFalse(bb_node.children)
+
+
 if __name__ == '__main__':
   unittest.main()
