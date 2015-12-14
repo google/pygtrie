@@ -49,4 +49,5 @@ To install pygtrie, run::
 
     pip install pygtrie
 
-Or download the sources and save ``trie.py`` file with your project.
+Or download the sources and save ``pygtrie.py`` file with your
+project.
