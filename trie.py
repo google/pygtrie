@@ -688,7 +688,7 @@ class CharTrie(Trie):
 class StringTrie(Trie):
   """A variant of :class:`trie.Trie` accepting strings with a separator as keys.
 
-  The trie accepts stings as keys which are split into components using
+  The trie accepts strings as keys which are split into components using
   a separator specified during initialisation ("/" by default).
   """
 
