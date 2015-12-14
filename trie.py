@@ -38,7 +38,7 @@ __author__ = 'Michal Nazarewicz <mina86@mina86.com>'
 __copyright__ = 'Copyright 2014 Google Inc.'
 
 
-import collections
+import collections as _collections
 
 
 class ShortKeyError(KeyError):
@@ -121,7 +121,7 @@ class _Node(object):
   __hash__ = None
 
 
-class Trie(collections.MutableMapping):
+class Trie(_collections.MutableMapping):
   """A trie implementation with dict interface plus some extensions.
 
   Keys used with the :class:`trie.Trie` must be iterable, yielding hashable
@@ -723,7 +723,7 @@ class StringTrie(Trie):
     return self._separator.join(path)
 
 
-class PrefixSet(collections.MutableSet):
+class PrefixSet(_collections.MutableSet):
   """A set of prefixes.
 
   :class:`trie.PrefixSet` works similar to a normal set except it is said to
