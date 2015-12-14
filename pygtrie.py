@@ -5,13 +5,14 @@
 or prefix tree, is a tree associating keys to values where all the descendants
 of a node have a common prefix (associated with that node).
 
-The trie module contains :class:`trie.Trie`, :class:`trie.CharTrie` and
-:class:`trie.StringTrie` classes each implementing a mutable mapping interface,
-i.e. :class:`dict` interface.  As such, in most circumstances,
-:class:`trie.Trie` could be used as a drop-in replacement for a :class:`dict`,
-but the prefix nature of the data structure is trie’s real strength.
+The trie module contains :class:`pygtrie.Trie`, :class:`pygtrie.CharTrie` and
+:class:`pygtrie.StringTrie` classes each implementing a mutable mapping
+interface, i.e. :class:`dict` interface.  As such, in most circumstances,
+:class:`pygtrie.Trie` could be used as a drop-in replacement for
+a :class:`dict`, but the prefix nature of the data structure is trie’s real
+strength.
 
-The module also contains :class:`trie.PrefixSet` class which uses a trie to
+The module also contains :class:`pygtrie.PrefixSet` class which uses a trie to
 store a set of prefixes such that a key is contained in the set if it or its
 prefix is stored in the set.
 
@@ -124,15 +125,15 @@ class _Node(object):
 class Trie(_collections.MutableMapping):
   """A trie implementation with dict interface plus some extensions.
 
-  Keys used with the :class:`trie.Trie` must be iterable, yielding hashable
+  Keys used with the :class:`pygtrie.Trie` must be iterable, yielding hashable
   objects.  In other words, for a given key, ``dict.fromkeys(key)`` must be
   valid.
 
   In particular, strings work fine as trie keys, however when getting keys back
   from iterkeys() method for example, instead of strings, tuples of characters
-  are produced.  For that reason, :class:`trie.CharTrie` or
-  :class:`trie.StringTrie` may be preferred when using :class:`trie.Trie` with
-  string keys.
+  are produced.  For that reason, :class:`pygtrie.CharTrie` or
+  :class:`pygtrie.StringTrie` may be preferred when using :class:`pygtrie.Trie`
+  with string keys.
   """
 
   # pylint: disable=invalid-name
@@ -674,11 +675,12 @@ class Trie(_collections.MutableMapping):
                          list(self.__path_from_key(prefix)))
 
 class CharTrie(Trie):
-  """A variant of a :class:`trie.Trie` which accepts strings as keys.
+  """A variant of a :class:`pygtrie.Trie` which accepts strings as keys.
 
-  The only difference between :class:`trie.CharTrie` and :class:`trie.Trie` is
-  that when :class:`trie.CharTrie` returns keys back to the client (for instance
-  in keys() method is called), those keys are returned as strings.
+  The only difference between :class:`pygtrie.CharTrie` and
+  :class:`pygtrie.Trie` is that when :class:`pygtrie.CharTrie` returns keys back
+  to the client (for instance in keys() method is called), those keys are
+  returned as strings.
   """
 
   def _key_from_path(self, path):
@@ -686,7 +688,7 @@ class CharTrie(Trie):
 
 
 class StringTrie(Trie):
-  """A variant of :class:`trie.Trie` accepting strings with a separator as keys.
+  """:class:`pygtrie.Trie` variant accepting strings with a separator as keys.
 
   The trie accepts strings as keys which are split into components using
   a separator specified during initialisation ("/" by default).
@@ -726,7 +728,7 @@ class StringTrie(Trie):
 class PrefixSet(_collections.MutableSet):
   """A set of prefixes.
 
-  :class:`trie.PrefixSet` works similar to a normal set except it is said to
+  :class:`pygtrie.PrefixSet` works similar to a normal set except it is said to
   contain a key if the key or it's prefix is stored in the set.  For instance,
   if "foo" is added to the set, the set contains "foo" as well as "foobar".
 
@@ -741,7 +743,7 @@ class PrefixSet(_collections.MutableSet):
     Args:
       iterable: A sequence of keys to add to the set.
       factory: A function used to create a trie used by the
-          :class:`trie.PrefixSet`.
+          :class:`pygtrie.PrefixSet`.
       kwargs: Additional keyword arguments passed to the factory function.
     """
     trie = factory(**kwargs)
