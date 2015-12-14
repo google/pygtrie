@@ -88,14 +88,14 @@ def readGitVersion():
             m.group('ver'), commits, int(m.group('sha'), 16))
 
 
-def readReleaseVersion():
+def readReleaseVersion(warn):
     try:
         fd = open(RELEASE_VERSION_FILE)
         try:
             ver = fd.readline().strip()
         finally:
             fd.close()
-        if not re.search(_PEP386_VERSION_RE, ver):
+        if warn and not re.search(_PEP386_VERSION_RE, ver):
             sys.stderr.write('version: release version (%s) is invalid, '
                              'will use it anyway\n' % ver)
         return ver
@@ -110,8 +110,9 @@ def writeReleaseVersion(version):
 
 
 def getVersion():
-    release_version = readReleaseVersion()
-    version = readGitVersion() or release_version
+    version = readGitVersion()
+    release_version = readReleaseVersion(not version)
+    version = version or release_version
     if not version:
         raise ValueError('Cannot find the version number')
     if version != release_version:
