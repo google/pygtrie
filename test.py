@@ -11,7 +11,7 @@ import functools
 import types
 import unittest
 
-import trie
+import __init__ as pygtrie
 
 
 def _UpdateTrieFactory(trie_cls, *args, **kw):
@@ -61,7 +61,7 @@ class TrieTestCase(unittest.TestCase):
   # The below need to be overwritten by subclasses
 
   # A Trie class being tested
-  _TRIE_CLS = trie.Trie
+  _TRIE_CLS = pygtrie.Trie
 
   # A key to set
   _SHORT_KEY = 'foo'
@@ -105,14 +105,14 @@ class TrieTestCase(unittest.TestCase):
     """
     if prefix:
       self.assertTrue(t.has_subtrie(key))
-      self.assertTrue(bool(t.has_node(key) & trie.Trie.HAS_SUBTRIE))
+      self.assertTrue(bool(t.has_node(key) & pygtrie.Trie.HAS_SUBTRIE))
     else:
       self.assertFalse(t.has_subtrie(key))
-      self.assertFalse(bool(t.has_node(key) & trie.Trie.HAS_SUBTRIE))
+      self.assertFalse(bool(t.has_node(key) & pygtrie.Trie.HAS_SUBTRIE))
     if value is None:
       o = object()
       self.assertNotIn(key, t)
-      key_error_exception = trie.ShortKeyError if prefix else KeyError
+      key_error_exception = pygtrie.ShortKeyError if prefix else KeyError
       self.assertRaises(key_error_exception, lambda: t[key])
       self.assertRaises(key_error_exception, t.pop, key)
       self.assertIsNone(t.get(key))
@@ -121,14 +121,15 @@ class TrieTestCase(unittest.TestCase):
       self.assertFalse(t.has_key(key))
       self.assertNotIn(self.KeyFromKey(key), list(t.iterkeys()))
       self.assertNotIn(self.KeyFromKey(key), t.keys())
-      self.assertEquals(trie.Trie.HAS_SUBTRIE if prefix else 0, t.has_node(key))
+      self.assertEquals(pygtrie.Trie.HAS_SUBTRIE if prefix else 0,
+                        t.has_node(key))
     else:
       self.assertIn(key, t)
       self.assertEquals(value, t[key])
       self.assertEquals(value, t.get(key))
       self.assertEquals(value, t.get(key, object()))
       self.assertTrue(t.has_key(key))
-      self.assertTrue(bool(t.has_node(key) & trie.Trie.HAS_VALUE))
+      self.assertTrue(bool(t.has_node(key) & pygtrie.Trie.HAS_VALUE))
       self.assertIn(self.KeyFromKey(key), list(t.iterkeys()))
       self.assertIn(self.KeyFromKey(key), t.keys())
 
@@ -300,7 +301,7 @@ class TrieTestCase(unittest.TestCase):
 
   def testPrefixSet(self):
     """PrefixSet test."""
-    ps = trie.PrefixSet(factory=self._TRIE_CLS)
+    ps = pygtrie.PrefixSet(factory=self._TRIE_CLS)
 
     short_key = self.KeyFromKey(self._SHORT_KEY)
     long_key = self.KeyFromKey(self._LONG_KEY)
@@ -367,14 +368,14 @@ for method_name in TrieTestCase.__dict__.keys():  # pylint: disable=g-builtin-op
 
 
 class CharTrieTestCase(TrieTestCase):
-  _TRIE_CLS = trie.CharTrie
+  _TRIE_CLS = pygtrie.CharTrie
 
   def KeyFromPath(self, path):
     return ''.join(path)
 
 
 class StringTrieTestCase(TrieTestCase):
-  _TRIE_CLS = trie.StringTrie
+  _TRIE_CLS = pygtrie.StringTrie
 
   _SHORT_KEY = '/home/foo'
   _LONG_KEY = _SHORT_KEY + '/bar/baz'
@@ -408,12 +409,12 @@ class TraverseTest(unittest.TestCase):
     return node
 
   def testTraverseEmptyTree(self):
-    t = trie.CharTrie()
+    t = pygtrie.CharTrie()
     r = t.traverse(self._make_test_node)
     self.assertNode(r, '', 0)
 
   def testTraverseSingletonTree(self):
-    t = trie.CharTrie()
+    t = pygtrie.CharTrie()
     t.update({'a': 10})
 
     r = t.traverse(self._make_test_node)
@@ -421,7 +422,7 @@ class TraverseTest(unittest.TestCase):
     self.assertNode(r.children[0], 'a', 0, 10)
 
   def testTraverse(self):
-    t = trie.CharTrie()
+    t = pygtrie.CharTrie()
     t.update({'aaa': 1, 'aab': 2, 'aac': 3, 'bb': 4})
 
     r = t.traverse(self._make_test_node)
@@ -445,7 +446,7 @@ class TraverseTest(unittest.TestCase):
     self.assertNode(b_node.children[0], 'bb', 0, 4)
 
   def testTraverseCompressing(self):
-    t = trie.CharTrie()
+    t = pygtrie.CharTrie()
     t.update({'aaa': 1, 'aab': 2, 'aac': 3, 'bb': 4})
 
     def make(path_conv, path, children, value=self._SENTINEL):
@@ -474,7 +475,7 @@ class TraverseTest(unittest.TestCase):
     self.assertNode(r.children[1], 'bb', 0, 4)
 
   def testTraverseIgnoreSubtrie(self):
-    t = trie.CharTrie()
+    t = pygtrie.CharTrie()
     t.update({'aaa': 1, 'aab': 2, 'aac': 3, 'b': 4})
 
     cnt = [0]

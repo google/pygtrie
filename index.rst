@@ -1,7 +1,7 @@
 pygtrie
 =======
 
-.. automodule:: trie
+.. automodule:: pygtrie
 
 Installation
 ------------
@@ -10,25 +10,26 @@ To install pygtrie, run::
 
     pip install pygtrie
 
-Or download the sources and save ``trie.py`` file with your project.
+Or download the sources and save ``pygtrie.py`` file with your
+project.
 
 Trie classes
 ------------
 
-.. autoclass:: trie.Trie
+.. autoclass:: pygtrie.Trie
    :members:
 
-.. autoclass:: trie.CharTrie
+.. autoclass:: pygtrie.CharTrie
    :members:
 
-.. autoclass:: trie.StringTrie
+.. autoclass:: pygtrie.StringTrie
    :members:
 
 
 PrefixSet class
 ---------------
 
-.. autoclass:: trie.PrefixSet
+.. autoclass:: pygtrie.PrefixSet
    :members:
 
 .. include:: version-history.rst

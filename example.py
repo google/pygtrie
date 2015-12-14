@@ -9,7 +9,8 @@ __copyright__  = 'Copyright 2014 Google Inc.'
 import os
 import stat
 import sys
-import trie
+
+import pygtrie
 
 
 print 'Storing file information in the trie'
@@ -21,7 +22,7 @@ SUB_DIR = os.path.join(ROOT_DIR, 'lib')
 SUB_DIRS = tuple(os.path.join(ROOT_DIR, d)
                  for d in ('lib', 'lib32', 'lib64', 'share'))
 
-t = trie.StringTrie(separator=os.path.sep)
+t = pygtrie.StringTrie(separator=os.path.sep)
 
 # Read sizes regular files into a Trie
 for dirpath, unused_dirnames, filenames in os.walk(ROOT_DIR):
@@ -57,7 +58,7 @@ print 'Storing URL handlers map'
 print '========================'
 print
 
-t = trie.CharTrie()
+t = pygtrie.CharTrie()
 t['/'] = lambda url: sys.stdout.write('Root handler: %s\n' % url)
 t['/foo'] = lambda url: sys.stdout.write('Foo handler: %s\n' % url)
 t['/foobar'] = lambda url: sys.stdout.write('FooBar handler: %s\n' % url)
@@ -99,7 +100,7 @@ print 'Prefix set'
 print '=========='
 print
 
-ps = trie.PrefixSet(factory=trie.StringTrie)
+ps = pygtrie.PrefixSet(factory=pygtrie.StringTrie)
 
 ps.add('/etc/rc.d')
 ps.add('/usr/local/share')
@@ -117,7 +118,7 @@ print 'Dictionary test'
 print '==============='
 print
 
-t = trie.CharTrie()
+t = pygtrie.CharTrie()
 t['cat'] = True
 t['caterpillar'] = True
 t['car'] = True
