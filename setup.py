@@ -24,7 +24,7 @@ kwargs = {
     'long_description': readme,
     'author': 'Michal Nazarewicz',
     'author_email': 'mina86@mina86.com',
-    'url': 'https://github.com/google/pytrie',
+    'url': 'https://github.com/google/pygtrie',
     'py_modules': ['trie'],
     'license': 'Apache-2.0',
     'platforms': 'Platform Independent',
