@@ -13,7 +13,7 @@ If “git describe” returns an error (likely because we're in an unpacked copy
 of a release tarball, rather than a git working copy), or returns a tag that
 does not match the above format, version is read from .version file.
 
-To use this script, simply import it your setup.py file, and use the results
+To use this script, simply import it in your setup.py file, and use the results
 of getVersion() as your package version:
 
     import version
@@ -42,7 +42,7 @@ __license__ = 'This file is placed into the public domain.'
 __maintainer__ = 'Michal Nazarewicz'
 __email__ = 'mina86@mina86.com'
 
-__all__ = ('getVersion')
+__all__ = ('getVersion',)
 
 
 import re
