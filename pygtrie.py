@@ -653,6 +653,7 @@ class Trie(_collections.MutableMapping):
 
     Note: node_factory's children argument is a generator which has a few
     consequences:
+
     * To traverse into node's children, the generator must be iterated over.
       This can by accomplished by a simple "children = list(children)"
       statement.
