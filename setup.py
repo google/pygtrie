@@ -25,7 +25,7 @@ kwargs = {
     'author': 'Michal Nazarewicz',
     'author_email': 'mina86@mina86.com',
     'url': 'https://github.com/google/pygtrie',
-    'py_modules': ['trie'],
+    'py_modules': ['pygtrie'],
     'license': 'Apache-2.0',
     'platforms': 'Platform Independent',
     'keywords': ['trie', 'prefix tree', 'data structure'],
