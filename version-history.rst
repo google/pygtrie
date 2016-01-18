@@ -1,6 +1,10 @@
 Version History
 ---------------
 
+1.1: 2016/01/18
+
+- Fixed PyPi installation issues; all should work now.
+
 1.0: 2015/12/16
 
 - The module has been renamed from ``trie`` to ``pygtrie``.  This
