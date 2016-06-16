@@ -9,6 +9,7 @@ __copyright__  = 'Copyright 2014 Google Inc.'
 import array
 import collections
 import functools
+import pickle
 import types
 import unittest
 
@@ -299,6 +300,17 @@ class TrieTestCase(unittest.TestCase):
     self.assertEquals([short_pair, long_pair], list(t.prefixes(self._LONG_KEY)))
     self.assertEquals([short_pair, long_pair],
                       list(t.prefixes(self._VERY_LONG_KEY)))
+
+  def DoTestPickle(self, trie_factory):
+    """https://github.com/google/pygtrie/issues/7"""
+    d = dict.fromkeys((self._SHORT_KEY, self._LONG_KEY, self._VERY_LONG_KEY,
+                       self._OTHER_KEY), 42)
+    t = trie_factory(self._TRIE_CLS, d)
+
+    pickled = pickle.dumps(t)
+    u = pickle.loads(pickled)
+
+    self.assertEquals(t, u)
 
   def testPrefixSet(self):
     """PrefixSet test."""

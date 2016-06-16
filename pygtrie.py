@@ -143,6 +143,17 @@ class _Node(object):
 
   __hash__ = None
 
+  def __getstate__(self):
+    if self.value is not _SENTINEL:
+      return (self.children, self.value)
+    elif self.children:
+      return self.children
+
+  def __setstate__(self, state):
+    if not isinstance(state, tuple):
+      state = (state, _SENTINEL)
+    self.children, self.value = state
+
 
 class Trie(_collections.MutableMapping):
   """A trie implementation with dict interface plus some extensions.
