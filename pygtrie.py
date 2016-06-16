@@ -73,16 +73,38 @@ class _Node(object):
     Yields:
       ``(path, value)`` tuples.
     """
-    if self.value is not _SENTINEL:
-      yield path, self.value
+    node = self
+
+    if node.value is not _SENTINEL:
+      yield path, node.value
       if shallow:
         return
-    path.append(None)
-    for step, node in sorted(self.children.iteritems()):
-      path[-1] = step
-      for pair in node.iterate(path, shallow=shallow):
-        yield pair
-    path.pop()
+
+    # Use iterative function with stack on the heap so we don't hit Python's
+    # recursion depth limits.
+    stack = []
+    while True:
+      stack.append(iter(sorted(node.children.iteritems())))
+      path.append(None)
+
+      while True:
+        step, node = next(stack[-1], (_SENTINEL, _SENTINEL))
+
+        # We're done with children, go up
+        if node is _SENTINEL:
+          stack.pop()
+          if not stack:
+            return
+          path.pop()
+          continue
+
+        path[-1] = step
+        if node.value is not _SENTINEL:
+          yield path, node.value
+          if shallow:
+            continue
+
+        break
 
   def traverse(self, node_factory, path_conv, path):
     """Traverses the node and returns another type of node from node_factory.
@@ -651,7 +673,7 @@ class Trie(_collections.MutableMapping):
     iterable of children nodes constructed by node_factory, optional value is
     the value associated with the path.
 
-    Note: node_factory's children argument is a generator which has a few
+    node_factory's children argument is a generator which has a few
     consequences:
 
     * To traverse into node's children, the generator must be iterated over.
@@ -663,6 +685,10 @@ class Trie(_collections.MutableMapping):
     * If children is stored as is (i.e. as a generator) when it is iterated over
       later on it will see state of the trie as it is during the iteration and
       not when traverse method was called.
+
+    Note: Unlike iterators, traverse method uses stack recursion which means
+          that using it on deep tries may lead to a RuntimeError exception
+          thrown once Python's maximum recursion depth is reached.
 
     Args:
       node_factory: Makes opaque objects from the keys and values of the trie.

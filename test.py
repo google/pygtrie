@@ -6,6 +6,7 @@ __author__     = 'Michal Nazarewicz <mina86@mina86.com>'
 __copyright__  = 'Copyright 2014 Google Inc.'
 
 
+import array
 import collections
 import functools
 import types
@@ -494,6 +495,27 @@ class TraverseTest(unittest.TestCase):
     self.assertNode(r, '', 1)
     self.assertNode(r.children[0], 'b', 0, 4)
     self.assertEquals(3, cnt[0])
+
+
+class RecursionTest(unittest.TestCase):
+  """Test for deep recursion.
+
+  https://github.com/google/pygtrie/issues/8
+  """
+
+  def CreateTrie(self):
+    trie = pygtrie.Trie()
+    for x in range(100):
+      y = array.array('h', range(x, 1000)).tostring()
+      trie.update([(y,x,)])
+    return trie
+
+  def testIterator(self):
+    for _ in self.CreateTrie().iteritems():
+      pass
+
+  def testCopy(self):
+    self.CreateTrie().copy()
 
 
 if __name__ == '__main__':
