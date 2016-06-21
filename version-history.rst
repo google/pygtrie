@@ -1,6 +1,14 @@
 Version History
 ---------------
 
+1.2: 2016/06/21
+
+- Tries can now be pickled.
+
+- Iterating no longer uses recursion so tries of arbitrary depth can be
+  iterated over.  The ``traverse`` method, however, still uses recursion
+  thus cannot be used on big structures.
+
 1.1: 2016/01/18
 
 - Fixed PyPi installation issues; all should work now.
