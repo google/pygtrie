@@ -73,38 +73,30 @@ class _Node(object):
     Yields:
       ``(path, value)`` tuples.
     """
-    node = self
-
-    if node.value is not _SENTINEL:
-      yield path, node.value
-      if shallow:
-        return
-
     # Use iterative function with stack on the heap so we don't hit Python's
     # recursion depth limits.
+    node = self
     stack = []
     while True:
-      stack.append(iter(sorted(node.children.iteritems())))
-      path.append(None)
+      if node.value is not _SENTINEL:
+        yield path, node.value
+
+      if (not shallow or node.value is _SENTINEL) and node.children:
+        items = node.children.items()
+        items.sort()
+        stack.append(iter(items))
+        path.append(None)
 
       while True:
-        step, node = next(stack[-1], (_SENTINEL, _SENTINEL))
-
-        # We're done with children, go up
-        if node is _SENTINEL:
+        try:
+          step, node = next(stack[-1])
+          path[-1] = step
+          break
+        except StopIteration:
           stack.pop()
-          if not stack:
-            return
           path.pop()
-          continue
-
-        path[-1] = step
-        if node.value is not _SENTINEL:
-          yield path, node.value
-          if shallow:
-            continue
-
-        break
+        except IndexError:
+          return
 
   def traverse(self, node_factory, path_conv, path):
     """Traverses the node and returns another type of node from node_factory.
