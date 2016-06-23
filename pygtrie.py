@@ -515,7 +515,7 @@ class Trie(_collections.MutableMapping):
     key, is_slice = self._slice_maybe(key_or_slice)
     self._set(key, value, clear_children=is_slice)
 
-  def setdefault(self, key, value):
+  def setdefault(self, key, value=None):
     """Sets value of a given node if not set already.  Returns it afterwards."""
     return self._set(key, value, only_if_missing=True)
 
