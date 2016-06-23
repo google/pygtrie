@@ -126,6 +126,27 @@ class _Node(object):
         return node_factory(*args)
 
     def __eq__(self, other):
+        # Like iterate, we don't recurse so this works on deep tries.
+        a, b = self, other
+        stack = []
+        while True:
+            if a.value != b.value or len(a.children) != len(b.children):
+                return False
+            if a.children:
+                stack.append((a.children.iteritems(), b.children))
+
+            while True:
+                try:
+                    key, a = next(stack[-1][0])
+                    b = stack[-1][1].get(key)
+                    if b is None:
+                        return False
+                    break
+                except StopIteration:
+                    stack.pop()
+                except IndexError:
+                    return True
+
         return self.value == other.value and self.children == other.children
 
     def __ne__(self, other):
