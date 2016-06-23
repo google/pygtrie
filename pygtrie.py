@@ -136,15 +136,92 @@ class _Node(object):
   __hash__ = None
 
   def __getstate__(self):
-    if self.value is not _SENTINEL:
-      return (self.children, self.value)
-    elif self.children:
-      return self.children
+    """Get state used for pickling.
+
+    The state is encoded as a list of simple commands which consist of an
+    integer and some command-dependent number of arguments.  The commands modify
+    what the current node is by navigating the trie up and down and setting node
+    values.  Possible commands are:
+
+    * [n, step0, step1, ..., stepn-1, value], for n >= 0, specifies step needed
+      to reach the next current node as well as its new value.  There is no way
+      to create a child node without setting its (or its descendant's) value.
+
+    * [-n], for -n < 0, specifies to go up n steps in the trie.
+
+    When encoded as a state, the commands are flattened into a single list.
+
+    For example::
+
+        [ 0, 'Root',
+          2, 'Foo', 'Bar', 'Root/Foo/Bar Node',
+         -1,
+          1, 'Baz', 'Root/Foo/Baz Node',
+         -2,
+          1, 'Qux', 'Root/Qux Node' ]
+
+    Creates the following hierarchy::
+
+        -* value: Root
+         +-- Foo --* no value
+         |         +-- Bar -- * value: Root/Foo/Bar Node
+         |         +-- Baz -- * value: Root/Foo/Baz Node
+         +-- Qux -- * value: Root/Qux Node
+
+    Returns:
+      A pickable state which can be passed to :func:`_Node.__setstate__` to
+      reconstruct the node and its full hierarchy.
+    """
+    # Like iterate, we don't recurse so pickling works on deep tries.
+    state = [] if self.value is _SENTINEL else [0]
+    last_cmd = 0
+    node = self
+    stack = []
+    while True:
+      if node.value is not _SENTINEL:
+        last_cmd = 0
+        state.append(node.value)
+      stack.append(node.children.iteritems())
+
+      while True:
+        try:
+          step, node = next(stack[-1])
+        except StopIteration:
+          if last_cmd < 0:
+            state[-1] -= 1
+          else:
+            last_cmd = -1
+            state.append(-1)
+          stack.pop()
+          continue
+        except IndexError:
+          if last_cmd < 0:
+            state.pop()
+          return state
+
+        if last_cmd > 0:
+          last_cmd += 1
+          state[-last_cmd] += 1
+        else:
+          last_cmd = 1
+          state.append(1)
+        state.append(step)
+        break
 
   def __setstate__(self, state):
-    if not isinstance(state, tuple):
-      state = (state, _SENTINEL)
-    self.children, self.value = state
+    """Construct node from pickable state.  See :func:`_Node.__getstate__`."""
+    self.__init__()
+    state = iter(state)
+    stack = [self]
+    for cmd in state:
+      if cmd < 0:
+        del stack[cmd:]
+      else:
+        while cmd > 0:
+          stack.append(type(self)())
+          stack[-2].children[next(state)] = stack[-1]
+          cmd -= 1
+        stack[-1].value = next(state)
 
 
 class Trie(_collections.MutableMapping):
