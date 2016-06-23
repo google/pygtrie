@@ -2,9 +2,10 @@ from distutils.core import setup
 import os
 import re
 import sys
-import version
 
-release = version.getVersion()
+import version  # pylint: disable=relative-import
+
+release = version.get_version()
 
 if len(sys.argv) == 2 and sys.argv[1] == 'builddoc':
     os.execlp('sphinx-build',

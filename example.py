@@ -2,9 +2,10 @@
 
 """trie module example code."""
 
-__author__     = 'Michal Nazarewicz <mina86@mina86.com>'
-__copyright__  = 'Copyright 2014 Google Inc.'
+__author__ = 'Michal Nazarewicz <mina86@mina86.com>'
+__copyright__ = 'Copyright 2014 Google Inc.'
 
+# pylint: disable=invalid-name
 
 import os
 import stat
@@ -81,6 +82,7 @@ try:
     import tty
 
     def getch():
+        """Reads single character from standard input."""
         attr = termios.tcgetattr(0)
         try:
             tty.setraw(0)
@@ -90,7 +92,7 @@ try:
 
 except ImportError:
     try:
-        from msvcrt import getch
+        from msvcrt import getch  # pylint: disable=import-error
     except ImportError:
         sys.exit(0)
 

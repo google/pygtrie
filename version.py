@@ -14,11 +14,11 @@ of a release tarball, rather than a git working copy), or returns a tag that
 does not match the above format, version is read from .version file.
 
 To use this script, simply import it in your setup.py file, and use the results
-of getVersion() as your package version:
+of get_version() as your package version:
 
     import version
     setup(
-        version=version.getVersion(),
+        version=version.get_version(),
         .
         .
         .
@@ -42,7 +42,7 @@ __license__ = 'This file is placed into the public domain.'
 __maintainer__ = 'Michal Nazarewicz'
 __email__ = 'mina86@mina86.com'
 
-__all__ = ('getVersion',)
+__all__ = ('get_version',)
 
 
 import re
@@ -60,7 +60,8 @@ _GIT_DESCRIPTION_RE = r'^v(?P<ver>%s)-(?P<commits>\d+)-g(?P<sha>[\da-f]+)$' % (
     _PEP386_SHORT_VERSION_RE)
 
 
-def readGitVersion():
+def read_git_version():
+    """Reads version from "git describe" command."""
     try:
         proc = subprocess.Popen(('git', 'describe', '--long',
                                  '--match', 'v[0-9]*.*'),
@@ -69,7 +70,7 @@ def readGitVersion():
         if proc.returncode:
             return None
         ver = data.splitlines()[0].strip()
-    except:
+    except:  # pylint: disable=bare-except
         return None
 
     if not ver:
@@ -88,7 +89,8 @@ def readGitVersion():
             m.group('ver'), commits, int(m.group('sha'), 16))
 
 
-def readReleaseVersion(warn):
+def read_release_version(warn):
+    """Reads release version from a .version file."""
     try:
         fd = open(RELEASE_VERSION_FILE)
         try:
@@ -99,26 +101,28 @@ def readReleaseVersion(warn):
             sys.stderr.write('version: release version (%s) is invalid, '
                              'will use it anyway\n' % ver)
         return ver
-    except:
+    except:  # pylint: disable=bare-except
         return None
 
 
-def writeReleaseVersion(version):
+def write_release_version(version):
+    """Writes release version to a .version file."""
     fd = open(RELEASE_VERSION_FILE, 'w')
     fd.write('%s\n' % version)
     fd.close()
 
 
-def getVersion():
-    version = readGitVersion()
-    release_version = readReleaseVersion(not version)
+def get_version():
+    """Figures out package's version; also stores it in a file."""
+    version = read_git_version()
+    release_version = read_release_version(not version)
     version = version or release_version
     if not version:
         raise ValueError('Cannot find the version number')
     if version != release_version:
-        writeReleaseVersion(version)
+        write_release_version(version)
     return version
 
 
 if __name__ == '__main__':
-    print getVersion()
+    print get_version()
