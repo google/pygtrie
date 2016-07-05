@@ -4,13 +4,13 @@ Version History
 2.0: To be released
 
 - Sorting of child nodes is no longer enabled by default.
-  Trie.enable_sorting method can be used to bring back old behaviour.
+  ``enable_sorting`` method can be used to bring back old behaviour.
 
 - Pickling protocol changed to allow serialisation of deep tries.
   With the new method, recursion is no longer used.  It is, however,
   incompatible with the one introduced by 1.2 release.
 
-1.2: 2016/06/21
+1.2: 2016/06/21  [pulled back from PyPi]
 
 - Tries can now be pickled.
 
