@@ -357,7 +357,7 @@ class TrieTestCase(unittest.TestCase):
         ps.add(self._OTHER_KEY)
         self.assertEquals(2, len(ps))
         self.assertEquals(sorted((short_key, other_key)),
-                                            list(ps.iter()))
+                          sorted(ps.iter()))
         self.assertEquals([short_key], list(ps.iter(self._SHORT_KEY)))
         self.assertEquals([long_key], list(ps.iter(self._LONG_KEY)))
         self.assertEquals([other_key], list(ps.iter(self._OTHER_KEY)))
@@ -395,7 +395,6 @@ for method_name in TrieTestCase.__dict__.keys():
             setattr(TrieTestCase, '%s__%s' % (method_name, factory_name),
                     method)
 
-
 class CharTrieTestCase(TrieTestCase):
     _TRIE_CLS = pygtrie.CharTrie
 
@@ -423,6 +422,23 @@ class StringTrieTestCase(TrieTestCase):
         return '/'.join(path)
 
 
+class SortTest(unittest.TestCase):
+
+    def test_enable_sorting(self):
+        keys = sorted(chr(x) for x in range(32, 128) if x != ord('/'))
+        t = pygtrie.StringTrie.fromkeys(keys)
+
+        # Unless dict's hash function is weird, trie's keys should not be
+        # returned in order.
+        self.assertNotEquals(keys, t.keys())
+        self.assertEquals(keys, sorted(t.keys()))
+
+        t.enable_sorting()
+        self.assertEquals(keys, t.keys())
+
+        t.enable_sorting(False)
+        self.assertNotEquals(keys, t.keys())
+
 
 class TraverseTest(unittest.TestCase):
     _SENTINEL = object()
@@ -430,7 +446,7 @@ class TraverseTest(unittest.TestCase):
 
     @classmethod
     def _make_test_node(cls, path_conv, path, children, value=_SENTINEL):
-        return cls._TestNode(path_conv(path), list(children), value)
+        return cls._TestNode(path_conv(path), sorted(children), value)
 
     def assertNode(self, node, key, children=0, value=_SENTINEL):  # pylint: disable=invalid-name
         self.assertTrue(node)
@@ -484,7 +500,7 @@ class TraverseTest(unittest.TestCase):
         t.update({'aaa': 1, 'aab': 2, 'aac': 3, 'bb': 4})
 
         def make(path_conv, path, children, value=self._SENTINEL):
-            children = list(children)
+            children = sorted(children)
             if value is self._SENTINEL and len(children) == 1:
                 # There is only one prefix.
                 return children[0]

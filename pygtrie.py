@@ -61,14 +61,17 @@ class _Node(object):
         self.children = {}
         self.value = _SENTINEL
 
-    def iterate(self, path, shallow=False):
+    def iterate(self, path, shallow, iteritems):
         """Yields all the nodes with values associated to them in the trie.
 
         Args:
             path: Path leading to this node.  Used to construct the key when
-                  returning value of this node and as a prefix for children.
+                returning value of this node and as a prefix for children.
             shallow: Perform a shallow traversal, i.e. do not yield nodes if
-                  their prefix has been yielded.
+                their prefix has been yielded.
+            iteritems: A function taking dictionary as argument and returning
+                iterator over its items.  Something other than dict.iteritems
+                may be given to enable sorting.
 
         Yields:
             ``(path, value)`` tuples.
@@ -82,9 +85,7 @@ class _Node(object):
                 yield path, node.value
 
             if (not shallow or node.value is _SENTINEL) and node.children:
-                items = node.children.items()
-                items.sort()
-                stack.append(iter(items))
+                stack.append(iteritems(node.children))
                 path.append(None)
 
             while True:
@@ -98,13 +99,16 @@ class _Node(object):
                 except IndexError:
                     return
 
-    def traverse(self, node_factory, path_conv, path):
+    def traverse(self, node_factory, path_conv, path, iteritems):
         """Traverses the node and returns another type of node from factory.
 
         Args:
             node_factory: Callable function to construct new nodes.
             path_conv: Callable function to convert node path to a key.
             path: Current path for this node.
+            iteritems: A function taking dictionary as argument and returning
+                iterator over its items.  Something other than dict.iteritems
+                may be given to enable sorting.
 
         Returns:
             An object constructed by calling node_factory(path_conv, path,
@@ -115,8 +119,9 @@ class _Node(object):
         """
         def children():
             """Recursively traverses all of node's children."""
-            for step, node in sorted(self.children.iteritems()):
-                yield node.traverse(node_factory, path_conv, path + [step])
+            for step, node in iteritems(self.children):
+                yield node.traverse(node_factory, path_conv, path + [step],
+                                    iteritems)
 
         args = [path_conv, tuple(path), children()]
 
@@ -268,7 +273,41 @@ class Trie(_collections.MutableMapping):
         them.
         """
         self._root = _Node()
+        self._sorted = False
         self.update(*args, **kwargs)
+
+    @staticmethod
+    def _sorted_iteritems(d):
+        items = d.items()
+        items.sort()
+        return iter(items)
+
+    @property
+    def _iteritems(self):
+        return self._sorted_iteritems if self._sorted else dict.iteritems
+
+    def enable_sorting(self, enable=True):
+        """Enables sorting of child nodes when iterating and traversing.
+
+        Normally, child nodes are not sorted when iterating or traversing over
+        the trie (just like dict elements are not sorted).  This method allows
+        sorting to be enabled (which was the behaviour prior to pygtrie 2.0
+        release).
+
+        For Trie class, enabling sorting of children is identical to simply
+        sorting the list of items since Trie returns keys as tuples.  However,
+        for other implementations such as StringTrie the two may behove subtly
+        different.  For example, sorting items might produce:
+
+            root/foo-bar
+            root/foo/baz
+
+        even though foo comes before foo-bar.
+
+        Args:
+            enable: Whether to enable sorting of child nodes.
+        """
+        self._sorted = enable
 
     def clear(self):
         """Removes all the values from the trie."""
@@ -364,7 +403,7 @@ class Trie(_collections.MutableMapping):
         """
         node, _ = self._get_node(prefix)
         for path, value in node.iterate(list(self.__path_from_key(prefix)),
-                                        shallow=shallow):
+                                        shallow, self._iteritems):
             yield (self._key_from_path(path), value)
 
     def iterkeys(self, prefix=_SENTINEL, shallow=False):
@@ -400,7 +439,7 @@ class Trie(_collections.MutableMapping):
         """
         node, _ = self._get_node(prefix)
         for _, value in node.iterate(list(self.__path_from_key(prefix)),
-                                     shallow=shallow):
+                                     shallow, self._iteritems):
             yield value
 
     def keys(self, prefix=_SENTINEL, shallow=False):
@@ -816,7 +855,8 @@ class Trie(_collections.MutableMapping):
         """
         node, _ = self._get_node(prefix)
         return node.traverse(node_factory, self._key_from_path,
-                             list(self.__path_from_key(prefix)))
+                             list(self.__path_from_key(prefix)),
+                             self._iteritems)
 
 class CharTrie(Trie):
     """A variant of a :class:`pygtrie.Trie` which accepts strings as keys.

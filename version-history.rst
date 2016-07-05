@@ -1,7 +1,10 @@
 Version History
 ---------------
 
-1.3: To be released
+2.0: To be released
+
+- Sorting of child nodes is no longer enabled by default.
+  Trie.enable_sorting method can be used to bring back old behaviour.
 
 - Pickling protocol changed to allow serialisation of deep tries.
   With the new method, recursion is no longer used.  It is, however,
