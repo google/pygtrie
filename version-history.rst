@@ -1,14 +1,16 @@
 Version History
 ---------------
 
-2.0: To be released
+2.0: 2016/07/06
 
-- Sorting of child nodes is no longer enabled by default.
+- Sorting of child nodes is disabled by default for better performance.
   ``enable_sorting`` method can be used to bring back old behaviour.
 
-- Pickling protocol changed to allow serialisation of deep tries.
-  With the new method, recursion is no longer used.  It is, however,
-  incompatible with the one introduced by 1.2 release.
+- Tries of arbitrary depth can be pickled without reaching Python’s
+  recursion limits.  (N.B. The pickle format is incompatible with one
+  from 1.2 release).  ``_Node``’s ``__getstate__`` and ``__setstate__``
+  method can be used to implement other serialisation methods such as
+  JSON.
 
 1.2: 2016/06/21  [pulled back from PyPi]
 
