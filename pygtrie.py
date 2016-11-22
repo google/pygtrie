@@ -277,13 +277,22 @@ class Trie(_collections.MutableMapping):
         self.update(*args, **kwargs)
 
     @staticmethod
-    def _sorted_iteritems(d):
+    def _sorted_iteritems(d):  # pylint: disable=invalid-name
+        """Iterates over dict's items in sorted order."""
         items = d.items()
         items.sort()
         return iter(items)
 
     @property
     def _iteritems(self):
+        """Returns function yielding over dict's items possibly in sorted order.
+
+        Returns:
+            A function iterating over items of a dictionary given as an
+            argument. If child nodes sorting has been enabled (via
+            :func:`Trie.enable_sorting` method), returned function will go
+            through the items in sorted order..
+        """
         return self._sorted_iteritems if self._sorted else dict.iteritems
 
     def enable_sorting(self, enable=True):
