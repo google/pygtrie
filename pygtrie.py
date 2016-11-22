@@ -737,9 +737,7 @@ class Trie(_collections.MutableMapping):
             equal ``key``) and ``value`` is a value associated with that key.
             If no node is found, ``(None, None)`` is returned.
         """
-        for ret in self.prefixes(key):
-            return ret
-        return (None, None)
+        return next(self.prefixes(key), (None, None))
 
     def longest_prefix(self, key):
         """Finds the longest prefix of a key with a value.
