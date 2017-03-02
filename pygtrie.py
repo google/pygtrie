@@ -1212,7 +1212,7 @@ class StringTrie(Trie):
         return self._separator.join(path)
 
 
-class PrefixSet(_collections.MutableSet):
+class PrefixSet(_collections.MutableSet):  # pylint: disable=abstract-class-not-used
     """A set of prefixes.
 
     :class:`pygtrie.PrefixSet` works similar to a normal set except it is said

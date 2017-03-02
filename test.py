@@ -538,8 +538,8 @@ class TraverseTest(unittest.TestCase):
             if path and path[0] == 'a':
                 return None
             else:
-                return self._TestNode(
-                    path_conv(path), filter(None, children), value)
+                children = [ch for ch in children if ch is not None]
+                return self._TestNode(path_conv(path), children, value)
 
         r = t.traverse(make)
         # Result:
