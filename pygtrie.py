@@ -252,6 +252,12 @@ class _Node(object):
                 stack[-1].value = next(state)
 
 
+_NONE_PAIR = type('NonePair', (tuple,), {
+    '__nonzero__': lambda _: False,
+    '__slots__': (),
+})((None, None))
+
+
 class Trie(_collections.MutableMapping):
     """A trie implementation with dict interface plus some extensions.
 
@@ -896,7 +902,9 @@ class Trie(_collections.MutableMapping):
 
         This is equivalent to taking the first object yielded by
         :func:`Trie.prefixes` with a default of `(None, None)` if said method
-        yields no items.
+        yields no items.  As an added bonus, the pair in that case will be
+        a falsy value (as opposed to regular two-element tuple of ``None``
+        values).
 
         Example:
 
@@ -908,6 +916,8 @@ class Trie(_collections.MutableMapping):
             ('foo', 'Foo')
             >>> t.longest_prefix('does/not/exist')
             (None, None)
+            >>> bool(t.longest_prefix('does/not/exist'))
+            False
 
         Args:
             key: Key to look for.
@@ -917,14 +927,16 @@ class Trie(_collections.MutableMapping):
             equal ``key``) and ``value`` is a value associated with that key.
             If no node is found, ``(None, None)`` is returned.
         """
-        return next(self.prefixes(key), (None, None))
+        return next(self.prefixes(key), _NONE_PAIR)
 
     def longest_prefix(self, key):
         """Finds the longest prefix of a key with a value.
 
         This is equivalent to taking the last object yielded by
         :func:`Trie.prefixes` with a default of `(None, None)` if said method
-        yields no items.
+        yields no items.  As an added bonus, the pair in that case will be
+        a falsy value (as opposed to regular two-element tuple of ``None``
+        values).
 
         Example:
 
@@ -936,6 +948,8 @@ class Trie(_collections.MutableMapping):
             ('foo/bar/baz', 'Baz')
             >>> t.longest_prefix('does/not/exist')
             (None, None)
+            >>> bool(t.longest_prefix('does/not/exist'))
+            False
 
         Args:
             key: Key to look for.
@@ -945,7 +959,7 @@ class Trie(_collections.MutableMapping):
             equal ``key``) and ``value`` is a value associated with that key.
             If no node is found, ``(None, None)`` is returned.
         """
-        ret = (None, None)
+        ret = _NONE_PAIR
         for ret in self.prefixes(key):
             pass
         return ret
