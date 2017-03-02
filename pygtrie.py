@@ -41,6 +41,21 @@ __copyright__ = 'Copyright 2014 Google Inc.'
 
 import collections as _collections
 
+# Python 2.x and 3.x compatibility stuff
+if hasattr(dict, 'iteritems'):
+    # pylint: disable=invalid-name
+    _iteritems = lambda d: d.iteritems()
+    _iterkeys = lambda d: d.iterkeys()
+    def _sorted_iteritems(d):
+        """Returns d's items in sorted order."""
+        items = d.items()
+        items.sort()
+        return iter(items)
+else:
+    _sorted_iteritems = lambda d: sorted(d.items())  # pylint: disable=invalid-name
+    _iteritems = lambda d: iter(d.items())  # pylint: disable=invalid-name
+    _iterkeys = lambda d: iter(d.keys())  # pylint: disable=invalid-name
+
 
 class ShortKeyError(KeyError):
     """Raised when given key is a prefix of a longer key."""
@@ -85,7 +100,7 @@ class _Node(object):
                 yield path, node.value
 
             if (not shallow or node.value is _SENTINEL) and node.children:
-                stack.append(iteritems(node.children))
+                stack.append(iter(iteritems(node.children)))
                 path.append(None)
 
             while True:
@@ -138,7 +153,7 @@ class _Node(object):
             if a.value != b.value or len(a.children) != len(b.children):
                 return False
             if a.children:
-                stack.append((a.children.iteritems(), b.children))
+                stack.append((_iteritems(a.children), b.children))
 
             while True:
                 try:
@@ -157,8 +172,10 @@ class _Node(object):
     def __ne__(self, other):
         return not self.__eq__(other)
 
-    def __nonzero__(self):
+    def __bool__(self):
         return bool(self.value is not _SENTINEL or self.children)
+
+    __nonzero__ = __bool__
 
     __hash__ = None
 
@@ -209,7 +226,7 @@ class _Node(object):
             if node.value is not _SENTINEL:
                 last_cmd = 0
                 state.append(node.value)
-            stack.append(node.children.iteritems())
+            stack.append(_iteritems(node.children))
 
             while True:
                 try:
@@ -254,6 +271,7 @@ class _Node(object):
 
 _NONE_PAIR = type('NonePair', (tuple,), {
     '__nonzero__': lambda _: False,
+    '__bool__': lambda _: False,
     '__slots__': (),
 })((None, None))
 
@@ -282,13 +300,6 @@ class Trie(_collections.MutableMapping):
         self._sorted = False
         self.update(*args, **kwargs)
 
-    @staticmethod
-    def _sorted_iteritems(d):  # pylint: disable=invalid-name
-        """Iterates over dict's items in sorted order."""
-        items = d.items()
-        items.sort()
-        return iter(items)
-
     @property
     def _iteritems(self):
         """Returns function yielding over dict's items possibly in sorted order.
@@ -299,7 +310,7 @@ class Trie(_collections.MutableMapping):
             :func:`Trie.enable_sorting` method), returned function will go
             through the items in sorted order..
         """
-        return self._sorted_iteritems if self._sorted else dict.iteritems
+        return _sorted_iteritems if self._sorted else _iteritems
 
     def enable_sorting(self, enable=True):
         """Enables sorting of child nodes when iterating and traversing.
@@ -340,7 +351,7 @@ class Trie(_collections.MutableMapping):
         # implementation where iteritems() is used avoiding the unnecessary
         # value look-up.
         if args and isinstance(args[0], Trie):
-            for key, value in args[0].iteritems():
+            for key, value in _iteritems(args[0]):
                 self[key] = value
             args = ()
         super(Trie, self).update(*args, **kwargs)
@@ -415,7 +426,7 @@ class Trie(_collections.MutableMapping):
             >>> t['foo'] = 'Foo'
             >>> t['foo/bar/baz'] = 'Baz'
             >>> t['qux'] = 'Qux'
-            >>> list(t.iteritems())
+            >>> t.items()
             [('qux', 'Qux'), ('foo', 'Foo'), ('foo/bar/baz', 'Baz')]
 
         Items are generated in topological order but the order of siblings is
@@ -427,13 +438,13 @@ class Trie(_collections.MutableMapping):
         With ``prefix`` argument, only items with specified prefix are generated
         (i.e. only given subtrie is traversed) as demonstrated by::
 
-            >>> list(t.iteritems(prefix='foo/bar'))
+            >>> t.items(prefix='foo/bar')
             [('foo/bar/baz', 'Baz')]
 
         With ``shallow`` argument, if a node has value associated with it, it's
         children are not traversed even if they exist which can be seen in::
 
-            >>> list(t.iteritems(shallow=True))
+            >>> t.items(shallow=True)
             [('qux', 'Qux'), ('foo', 'Foo')]
 
         Args:
@@ -814,7 +825,7 @@ class Trie(_collections.MutableMapping):
         node = self._root
         trace = [(None, node)]
         while node.value is _SENTINEL:
-            step = next(node.children.iterkeys())
+            step = next(_iterkeys(node.children))
             node = node.children[step]
             trace.append((step, node))
         return (self._key_from_path((step for step, _ in trace[1:])),

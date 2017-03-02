@@ -8,9 +8,7 @@ __copyright__ = 'Copyright 2014 Google Inc.'
 
 import array
 import collections
-import functools
 import pickle
-import types
 import unittest
 
 import __init__ as pygtrie  # pylint: disable=relative-import
@@ -51,7 +49,7 @@ _TRIE_FACTORIES = ((
         lambda trie_cls, d: _update_trie_factory(trie_cls, **d)
 ), (
         'UpdateWithTuples',
-        lambda trie_cls, d: _update_trie_factory(trie_cls, d.iteritems())
+        lambda trie_cls, d: _update_trie_factory(trie_cls, d.items())
 ), (
         'UpdateWithDict',
         _update_trie_factory
@@ -130,13 +128,13 @@ class TrieTestCase(unittest.TestCase):
             self.assertFalse(t.has_key(key))
             self.assertNotIn(self.key_from_key(key), list(t.iterkeys()))
             self.assertNotIn(self.key_from_key(key), t.keys())
-            self.assertEquals(pygtrie.Trie.HAS_SUBTRIE if prefix else 0,
+            self.assertEqual(pygtrie.Trie.HAS_SUBTRIE if prefix else 0,
                                                 t.has_node(key))
         else:
             self.assertIn(key, t)
-            self.assertEquals(value, t[key])
-            self.assertEquals(value, t.get(key))
-            self.assertEquals(value, t.get(key, object()))
+            self.assertEqual(value, t[key])
+            self.assertEqual(value, t.get(key))
+            self.assertEqual(value, t.get(key, object()))
             self.assertTrue(t.has_key(key))
             self.assertTrue(bool(t.has_node(key) & pygtrie.Trie.HAS_VALUE))
             self.assertIn(self.key_from_key(key), list(t.iterkeys()))
@@ -144,7 +142,7 @@ class TrieTestCase(unittest.TestCase):
 
     def assertFullTrie(self, t, value=42):
         """Asserts a trie has _SHORT_KEY and _LONG_KEY set to value."""
-        self.assertEquals(2, len(t))
+        self.assertEqual(2, len(t))
         for prefix in self._SHORT_PREFIXES + self._LONG_PREFIXES:
             self.assertNodeState(t, prefix, prefix=True)
         self.assertNodeState(t, self._SHORT_KEY, prefix=True, value=value)
@@ -154,7 +152,7 @@ class TrieTestCase(unittest.TestCase):
 
     def assertShortTrie(self, t, value=42):
         """Asserts a trie has only _SHORT_KEY set to value."""
-        self.assertEquals(1, len(t))
+        self.assertEqual(1, len(t))
         for prefix in self._SHORT_PREFIXES:
             self.assertNodeState(t, prefix, prefix=True)
         for key in self._LONG_PREFIXES + (
@@ -164,7 +162,7 @@ class TrieTestCase(unittest.TestCase):
 
     def assertEmptyTrie(self, t):
         """Asserts a trie is empty."""
-        self.assertEquals(0, len(t), '%r should be empty: %d' % (t, len(t)))
+        self.assertEqual(0, len(t), '%r should be empty: %d' % (t, len(t)))
 
         for key in self._SHORT_PREFIXES + self._LONG_PREFIXES + (
                 self._SHORT_KEY, self._LONG_KEY, self._VERY_LONG_KEY,
@@ -173,56 +171,56 @@ class TrieTestCase(unittest.TestCase):
 
         self.assertRaises(KeyError, t.popitem)
 
-        self.assertEquals('Trie()', str(t))
-        self.assertEquals('Trie()', repr(t))
+        self.assertEqual('Trie()', str(t))
+        self.assertEqual('Trie()', repr(t))
 
     # pylint: enable=invalid-name
 
-    def do_test_basics(self, trie_factory):
+    def _do_test_basics(self, trie_factory):
         """Basic trie tests."""
         d = dict.fromkeys((self._SHORT_KEY, self._LONG_KEY), 42)
         t = trie_factory(self._TRIE_CLS, d)
 
         self.assertFullTrie(t)
 
-        self.assertEquals(42, t.pop(self._LONG_KEY))
+        self.assertEqual(42, t.pop(self._LONG_KEY))
         self.assertShortTrie(t)
 
-        self.assertEquals(42, t.setdefault(self._SHORT_KEY, 24))
+        self.assertEqual(42, t.setdefault(self._SHORT_KEY, 24))
         self.assertShortTrie(t)
 
         t[self._SHORT_KEY] = 24
         self.assertShortTrie(t, 24)
 
-        self.assertEquals(24, t.setdefault(self._LONG_KEY, 24))
+        self.assertEqual(24, t.setdefault(self._LONG_KEY, 24))
         self.assertFullTrie(t, 24)
 
         del t[self._LONG_KEY]
         self.assertShortTrie(t, 24)
 
-        self.assertEquals((self.key_from_key(self._SHORT_KEY), 24), t.popitem())
+        self.assertEqual((self.key_from_key(self._SHORT_KEY), 24), t.popitem())
         self.assertEmptyTrie(t)
 
-    def do_test_iterator(self, trie_factory):
+    def _do_test_iterator(self, trie_factory):
         """Trie iterator tests."""
         d = dict.fromkeys((self._SHORT_KEY, self._LONG_KEY), 42)
         t = trie_factory(self._TRIE_CLS, d)
 
-        self.assertEquals([42, 42], t.values())
-        self.assertEquals([42, 42], list(t.itervalues()))
+        self.assertEqual([42, 42], t.values())
+        self.assertEqual([42, 42], list(t.itervalues()))
 
         short_key = self.key_from_key(self._SHORT_KEY)
         long_key = self.key_from_key(self._LONG_KEY)
 
         expected_items = [(short_key, 42), (long_key, 42)]
-        self.assertEquals(expected_items, sorted(t.items()))
-        self.assertEquals(expected_items, sorted(t.iteritems()))
+        self.assertEqual(expected_items, sorted(t.items()))
+        self.assertEqual(expected_items, sorted(t.iteritems()))
 
-        self.assertEquals([short_key, long_key], sorted(t))
-        self.assertEquals([short_key, long_key], sorted(t.keys()))
-        self.assertEquals([short_key, long_key], sorted(t.iterkeys()))
+        self.assertEqual([short_key, long_key], sorted(t))
+        self.assertEqual([short_key, long_key], sorted(t.keys()))
+        self.assertEqual([short_key, long_key], sorted(t.iterkeys()))
 
-    def do_test_subtrie_iterator(self, trie_factory):
+    def _do_test_subtrie_iterator(self, trie_factory):
         """Subtrie iterator tests."""
         d = dict.fromkeys((self._SHORT_KEY, self._LONG_KEY), 42)
         t = trie_factory(self._TRIE_CLS, d)
@@ -230,47 +228,47 @@ class TrieTestCase(unittest.TestCase):
         long_key = self.key_from_key(self._LONG_KEY)
         prefix = self._LONG_PREFIXES[0]
 
-        self.assertEquals([42, 42], t.values(prefix=self._SHORT_KEY))
-        self.assertEquals([42, 42], list(t.itervalues(prefix=self._SHORT_KEY)))
-        self.assertEquals([42], t.values(prefix=prefix))
-        self.assertEquals([42], list(t.itervalues(prefix=prefix)))
+        self.assertEqual([42, 42], t.values(prefix=self._SHORT_KEY))
+        self.assertEqual([42, 42], list(t.itervalues(prefix=self._SHORT_KEY)))
+        self.assertEqual([42], t.values(prefix=prefix))
+        self.assertEqual([42], list(t.itervalues(prefix=prefix)))
 
         expected_items = [(long_key, 42)]
-        self.assertEquals(expected_items, sorted(t.items(prefix=prefix)))
-        self.assertEquals(expected_items, sorted(t.iteritems(prefix=prefix)))
+        self.assertEqual(expected_items, sorted(t.items(prefix=prefix)))
+        self.assertEqual(expected_items, sorted(t.iteritems(prefix=prefix)))
 
-        self.assertEquals([long_key], sorted(t.keys(prefix=prefix)))
-        self.assertEquals([long_key], sorted(t.iterkeys(prefix=prefix)))
+        self.assertEqual([long_key], sorted(t.keys(prefix=prefix)))
+        self.assertEqual([long_key], sorted(t.iterkeys(prefix=prefix)))
 
-    def do_test_shallow_iterator(self, trie_factory):
+    def _do_test_shallow_iterator(self, trie_factory):
         """Shallow iterator test."""
         d = dict.fromkeys((self._SHORT_KEY, self._LONG_KEY), 42)
         t = trie_factory(self._TRIE_CLS, d)
 
-        self.assertEquals([42], t.values(shallow=True))
-        self.assertEquals([42], list(t.itervalues(shallow=True)))
+        self.assertEqual([42], t.values(shallow=True))
+        self.assertEqual([42], list(t.itervalues(shallow=True)))
 
         short_key = self.key_from_key(self._SHORT_KEY)
 
         expected_items = [(short_key, 42)]
-        self.assertEquals(expected_items, sorted(t.items(shallow=True)))
-        self.assertEquals(expected_items, sorted(t.iteritems(shallow=True)))
+        self.assertEqual(expected_items, sorted(t.items(shallow=True)))
+        self.assertEqual(expected_items, sorted(t.iteritems(shallow=True)))
 
-        self.assertEquals([short_key], sorted(t.keys(shallow=True)))
-        self.assertEquals([short_key], sorted(t.iterkeys(shallow=True)))
+        self.assertEqual([short_key], sorted(t.keys(shallow=True)))
+        self.assertEqual([short_key], sorted(t.iterkeys(shallow=True)))
 
-    def do_test_splice_operations(self, trie_factory):
+    def _do_test_splice_operations(self, trie_factory):
         """Splice trie operations tests."""
         d = dict.fromkeys((self._SHORT_KEY, self._LONG_KEY), 42)
         t = trie_factory(self._TRIE_CLS, d)
 
-        self.assertEquals([42, 42], list(t[self._SHORT_KEY:]))
-        self.assertEquals([42], list(t[self._LONG_PREFIXES[0]:]))
+        self.assertEqual([42, 42], list(t[self._SHORT_KEY:]))
+        self.assertEqual([42], list(t[self._LONG_PREFIXES[0]:]))
 
         t[self._SHORT_KEY:] = 24
         self.assertShortTrie(t, 24)
 
-        self.assertEquals([24], list(t[self._SHORT_KEY:]))
+        self.assertEqual([24], list(t[self._SHORT_KEY:]))
         self.assertRaises(KeyError, lambda: list(t[self._LONG_PREFIXES[0]:]))
 
         t[self._LONG_KEY:] = 24
@@ -279,7 +277,7 @@ class TrieTestCase(unittest.TestCase):
         del t[self._SHORT_KEY:]
         self.assertEmptyTrie(t)
 
-    def do_test_find_prefix(self, trie_factory):
+    def _do_test_find_prefix(self, trie_factory):
         """Prefix finding methods tests."""
         d = dict.fromkeys((self._SHORT_KEY, self._LONG_KEY), 42)
         t = trie_factory(self._TRIE_CLS, d)
@@ -289,7 +287,7 @@ class TrieTestCase(unittest.TestCase):
         none_pair = (None, None)
 
         def assert_pair(expected, got):
-            self.assertEquals(expected, got)
+            self.assertEqual(expected, got)
             if expected[0]:
                 self.assertTrue(got)
             else:
@@ -309,16 +307,16 @@ class TrieTestCase(unittest.TestCase):
         assert_pair(short_pair, t.longest_prefix(self._SHORT_KEY))
         assert_pair(none_pair, t.shortest_prefix(self._SHORT_PREFIXES[-1]))
 
-        self.assertEquals([], list(t.prefixes(self._SHORT_PREFIXES[-1])))
-        self.assertEquals([short_pair], list(t.prefixes(self._SHORT_KEY)))
-        self.assertEquals([short_pair],
+        self.assertEqual([], list(t.prefixes(self._SHORT_PREFIXES[-1])))
+        self.assertEqual([short_pair], list(t.prefixes(self._SHORT_KEY)))
+        self.assertEqual([short_pair],
                           list(t.prefixes(self._LONG_PREFIXES[-1])))
-        self.assertEquals([short_pair, long_pair],
+        self.assertEqual([short_pair, long_pair],
                           list(t.prefixes(self._LONG_KEY)))
-        self.assertEquals([short_pair, long_pair],
+        self.assertEqual([short_pair, long_pair],
                           list(t.prefixes(self._VERY_LONG_KEY)))
 
-    def do_test_pickle(self, trie_factory):
+    def _do_test_pickle(self, trie_factory):
         """https://github.com/google/pygtrie/issues/7"""
         d = dict.fromkeys((self._SHORT_KEY, self._LONG_KEY, self._VERY_LONG_KEY,
                                              self._OTHER_KEY), 42)
@@ -327,7 +325,7 @@ class TrieTestCase(unittest.TestCase):
         pickled = pickle.dumps(t)
         u = pickle.loads(pickled)
 
-        self.assertEquals(t, u)
+        self.assertEqual(t, u)
 
     def test_prefix_set(self):
         """PrefixSet test."""
@@ -340,30 +338,30 @@ class TrieTestCase(unittest.TestCase):
 
         for key in (self._LONG_KEY, self._VERY_LONG_KEY):
             ps.add(key)
-            self.assertEquals(1, len(ps))
-            self.assertEquals([long_key], list(ps.iter()))
-            self.assertEquals([long_key], list(iter(ps)))
-            self.assertEquals([long_key], list(ps.iter(self._SHORT_KEY)))
-            self.assertEquals([long_key], list(ps.iter(self._LONG_KEY)))
-            self.assertEquals([very_long_key],
+            self.assertEqual(1, len(ps))
+            self.assertEqual([long_key], list(ps.iter()))
+            self.assertEqual([long_key], list(iter(ps)))
+            self.assertEqual([long_key], list(ps.iter(self._SHORT_KEY)))
+            self.assertEqual([long_key], list(ps.iter(self._LONG_KEY)))
+            self.assertEqual([very_long_key],
                               list(ps.iter(self._VERY_LONG_KEY)))
-            self.assertEquals([], list(ps.iter(self._OTHER_KEY)))
+            self.assertEqual([], list(ps.iter(self._OTHER_KEY)))
 
         ps.add(self._SHORT_KEY)
-        self.assertEquals(1, len(ps))
-        self.assertEquals([short_key], list(ps.iter()))
-        self.assertEquals([short_key], list(iter(ps)))
-        self.assertEquals([short_key], list(ps.iter(self._SHORT_KEY)))
-        self.assertEquals([long_key], list(ps.iter(self._LONG_KEY)))
-        self.assertEquals([], list(ps.iter(self._OTHER_KEY)))
+        self.assertEqual(1, len(ps))
+        self.assertEqual([short_key], list(ps.iter()))
+        self.assertEqual([short_key], list(iter(ps)))
+        self.assertEqual([short_key], list(ps.iter(self._SHORT_KEY)))
+        self.assertEqual([long_key], list(ps.iter(self._LONG_KEY)))
+        self.assertEqual([], list(ps.iter(self._OTHER_KEY)))
 
         ps.add(self._OTHER_KEY)
-        self.assertEquals(2, len(ps))
-        self.assertEquals(sorted((short_key, other_key)),
+        self.assertEqual(2, len(ps))
+        self.assertEqual(sorted((short_key, other_key)),
                           sorted(ps.iter()))
-        self.assertEquals([short_key], list(ps.iter(self._SHORT_KEY)))
-        self.assertEquals([long_key], list(ps.iter(self._LONG_KEY)))
-        self.assertEquals([other_key], list(ps.iter(self._OTHER_KEY)))
+        self.assertEqual([short_key], list(ps.iter(self._SHORT_KEY)))
+        self.assertEqual([long_key], list(ps.iter(self._LONG_KEY)))
+        self.assertEqual([other_key], list(ps.iter(self._OTHER_KEY)))
 
     def test_equality(self):
         """Tests equality comparison."""
@@ -372,31 +370,37 @@ class TrieTestCase(unittest.TestCase):
         tries = [factory(self._TRIE_CLS, d) for _, factory in _TRIE_FACTORIES]
 
         for i in range(1, len(tries)):
-            self.assertEquals(tries[i-1], tries[i],
+            self.assertEqual(tries[i-1], tries[i],
                               '%r (factory: %s) should equal %r (factory: %s)' %
                               (tries[i-1], _TRIE_FACTORIES[i-1][0],
                                tries[i], _TRIE_FACTORIES[i][0]))
 
         for i in range(1, len(tries)):
             tries[i-1][self._OTHER_KEY] = 42
-            self.assertNotEquals(
+            self.assertNotEqual(
                     tries[i-1], tries[i],
                     '%r (factory: %s) should not be equal %r (factory: %s)' %
                     (tries[i-1], _TRIE_FACTORIES[i-1][0],
                      tries[i], _TRIE_FACTORIES[i][0]))
 
 
-for method_name in TrieTestCase.__dict__.keys():
-    if method_name.startswith('do_test_'):
-        original_method = getattr(TrieTestCase, method_name)
-        method_name = method_name[3:]
+def _construct_trie_test_cases():
+
+    def make_test_method(method, factory):
+        return lambda self: method(self, trie_factory=factory)
+
+    for name in list(TrieTestCase.__dict__.keys()):
+        if not name.startswith('_do_test_'):
+            continue
+        orig = getattr(TrieTestCase, name)
         for factory_name, factory in _TRIE_FACTORIES:
-            method = functools.partial(original_method, trie_factory=factory)
+            method = make_test_method(orig, factory)
             method.__doc__ = '%s using %s trie factory.' % (
-                    original_method.__doc__[:-2], factory_name)
-            method = types.MethodType(method, None, TrieTestCase)
-            setattr(TrieTestCase, '%s__%s' % (method_name, factory_name),
-                    method)
+                orig.__doc__[:-2], factory_name)
+            setattr(TrieTestCase, '%s_%s' % (name[4:], factory_name), method)
+
+_construct_trie_test_cases()
+
 
 class CharTrieTestCase(TrieTestCase):
     _TRIE_CLS = pygtrie.CharTrie
@@ -433,14 +437,14 @@ class SortTest(unittest.TestCase):
 
         # Unless dict's hash function is weird, trie's keys should not be
         # returned in order.
-        self.assertNotEquals(keys, t.keys())
-        self.assertEquals(keys, sorted(t.keys()))
+        self.assertNotEqual(keys, t.keys())
+        self.assertEqual(keys, sorted(t.keys()))
 
         t.enable_sorting()
-        self.assertEquals(keys, t.keys())
+        self.assertEqual(keys, t.keys())
 
         t.enable_sorting(False)
-        self.assertNotEquals(keys, t.keys())
+        self.assertNotEqual(keys, t.keys())
 
 
 class TraverseTest(unittest.TestCase):
@@ -453,9 +457,9 @@ class TraverseTest(unittest.TestCase):
 
     def assertNode(self, node, key, children=0, value=_SENTINEL):  # pylint: disable=invalid-name
         self.assertTrue(node)
-        self.assertEquals(key, node.key)
-        self.assertEquals(children, len(node.children))
-        self.assertEquals(value, node.value)
+        self.assertEqual(key, node.key)
+        self.assertEqual(children, len(node.children))
+        self.assertEqual(value, node.value)
         return node
 
     def test_traverse_empty_tree(self):
@@ -550,7 +554,7 @@ class TraverseTest(unittest.TestCase):
         #  b:4
         self.assertNode(r, '', 1)
         self.assertNode(r.children[0], 'b', 0, 4)
-        self.assertEquals(3, cnt[0])
+        self.assertEqual(3, cnt[0])
 
 
 class RecursionTest(unittest.TestCase):
@@ -561,9 +565,12 @@ class RecursionTest(unittest.TestCase):
 
     @staticmethod
     def create_trie():
+        tostring = (getattr(array.array, 'tobytes', None) or # Python 3
+                    getattr(array.array, 'tostring'))  # Python 3
+
         trie = pygtrie.Trie()
         for x in range(100):
-            y = array.array('h', range(x, 1000)).tostring()
+            y = tostring(array.array('h', range(x, 1000)))
             trie.update([(y, x)])
         return trie
 
