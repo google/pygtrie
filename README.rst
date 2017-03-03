@@ -1,11 +1,11 @@
 pygtrie
 =======
 
-.. image:: https://readthedocs.io/projects/pygtrie/badge/?version=latest
+.. image:: https://readthedocs.org/projects/pygtrie/badge/?version=latest
    :target: http://pygtrie.readthedocs.io/en/latest/
    :alt: Documentation Status (latest)
 
-.. image:: https://readthedocs.io/projects/pygtrie/badge/?version=stable
+.. image:: https://readthedocs.org/projects/pygtrie/badge/?version=stable
    :target: http://pygtrie.readthedocs.io/en/stable/
    :alt: Documentation Status (stable)
 
