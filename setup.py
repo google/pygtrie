@@ -31,7 +31,7 @@ kwargs = {
     'platforms': 'Platform Independent',
     'keywords': ['trie', 'prefix tree', 'data structure'],
     'classifiers': [
-        'Development Status :: 4 - Beta',
+        'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: Apache Software License',
         'Operating System :: OS Independent',
@@ -39,6 +39,7 @@ kwargs = {
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
 }
