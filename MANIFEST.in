@@ -1,4 +1,4 @@
-include test.py example.py __init__.py
+include test.py example.py
 include README.rst
 include conf.py index.rst version-history.rst
 include version.py .version

@@ -3,7 +3,7 @@ import os
 import re
 import sys
 
-import version  # pylint: disable=relative-import
+import version
 
 release = version.get_version()
 
