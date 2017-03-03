@@ -11,7 +11,7 @@ import collections
 import pickle
 import unittest
 
-import __init__ as pygtrie  # pylint: disable=relative-import
+import pygtrie  # pylint: disable=relative-import
 
 
 # pylint: disable=missing-docstring
