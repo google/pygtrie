@@ -69,7 +69,7 @@ def read_git_version():
         data, _ = proc.communicate()
         if proc.returncode:
             return None
-        ver = ver.decode(getattr(sys.stdin, 'encoding', 'ascii'))
+        data = data.decode(getattr(sys.stdin, 'encoding', 'ascii'))
         ver = data.splitlines()[0].strip()
     except:  # pylint: disable=bare-except
         return None
