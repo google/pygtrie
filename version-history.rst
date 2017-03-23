@@ -1,6 +1,14 @@
 Version History
 ---------------
 
+2.1: 2017/03/23
+
+- The library is now Python 3 compatible.
+
+- Value returend by ``shortest_prefix`` and ``longest_prefix`` evaluates
+  to false if no prefix was found.  This is in addition to it being
+  a pair of Nones of course.
+
 2.0: 2016/07/06
 
 - Sorting of child nodes is disabled by default for better performance.
