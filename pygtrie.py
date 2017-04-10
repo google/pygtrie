@@ -923,11 +923,11 @@ class Trie(_collections.MutableMapping):
             >>> t = pygtrie.StringTrie()
             >>> t['foo'] = 'Foo'
             >>> t['foo/bar/baz'] = 'Baz'
-            >>> t.longest_prefix('foo/bar/baz/qux')
+            >>> t.shortest_prefix('foo/bar/baz/qux')
             ('foo', 'Foo')
-            >>> t.longest_prefix('does/not/exist')
+            >>> t.shortest_prefix('does/not/exist')
             (None, None)
-            >>> bool(t.longest_prefix('does/not/exist'))
+            >>> bool(t.shortest_prefix('does/not/exist'))
             False
 
         Args:
