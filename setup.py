@@ -2,7 +2,7 @@ from distutils.core import setup
 import os
 import re
 import sys
-
+import codecs
 import version
 
 release = version.get_version()
@@ -13,9 +13,9 @@ if len(sys.argv) == 2 and sys.argv[1] == 'builddoc':
               '-Dversion=' + '.'.join(release.split('.', 2)[0:2]),
               '.', 'html')
 
-with open('README.rst') as f:
+with codecs.open('README.rst', 'r', 'utf-8') as f:
     readme = f.read()
-with open('version-history.rst') as f:
+with codecs.open('version-history.rst', 'r', 'utf-8') as f:
     readme += '\n' + f.read()
 
 kwargs = {
