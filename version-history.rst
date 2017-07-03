@@ -1,6 +1,11 @@
 Version History
 ---------------
 
+2.2: 2017/06/03
+
+- Fixes to setup.py breaking on Windows which prevents installation
+  among other things.
+
 2.1: 2017/03/23
 
 - The library is now Python 3 compatible.
