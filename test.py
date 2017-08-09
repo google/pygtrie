@@ -428,6 +428,19 @@ class StringTrieTestCase(TrieTestCase):
     def key_from_path(cls, path):
         return '/'.join(path)
 
+    def test_valid_separator(self):
+        t = pygtrie.StringTrie()
+        t['foo/bar'] = 42
+        self.assertTrue(bool(t.has_node('foo') & pygtrie.Trie.HAS_SUBTRIE))
+
+        t = pygtrie.StringTrie(separator='.')
+        t['foo.bar'] = 42
+        self.assertTrue(bool(t.has_node('foo') & pygtrie.Trie.HAS_SUBTRIE))
+
+    def test_invalid_separator(self):
+        self.assertRaises(TypeError, pygtrie.StringTrie, separator=42)
+        self.assertRaises(ValueError, pygtrie.StringTrie, separator='')
+
 
 class SortTest(unittest.TestCase):
 
