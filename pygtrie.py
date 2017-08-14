@@ -56,6 +56,11 @@ else:
     _iteritems = lambda d: iter(d.items())  # pylint: disable=invalid-name
     _iterkeys = lambda d: iter(d.keys())  # pylint: disable=invalid-name
 
+try:
+    _basestring = basestring
+except NameError:
+    _basestring = str
+
 
 class ShortKeyError(KeyError):
     """Raised when given key is a prefix of a longer key."""
@@ -1220,7 +1225,14 @@ class StringTrie(Trie):
                 named argument is not specified on the function's prototype
                 because of Python's limitations.
         """
-        self._separator = kwargs.pop('separator', '/')
+        separator = kwargs.pop('separator', '/')
+        if not isinstance(separator, _basestring):
+            raise TypeError('separator must be a string')
+
+        if not separator:
+            raise ValueError('separator can not be empty')
+
+        self._separator = separator
         super(StringTrie, self).__init__(*args, **kwargs)
 
     @classmethod
