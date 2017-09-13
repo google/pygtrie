@@ -1364,13 +1364,35 @@ class PrefixSet(_collections.MutableSet):  # pylint: disable=abstract-class-not-
             self._trie[key:] = True
 
     def discard(self, key):
-        raise NotImplementedError(
-            'Removing keys from PrefixSet is not implemented.')
+        try:
+            node, _ = self._get_node(key)
+        except:
+            pass
 
+        if node and node.children:
+            for child in node.children:
+                self.discard(child)
+        else:
+            node.children = {}
+            node.value = _SENTINEL
+        
+
+
+    # Raises KeyError if elem is not contained in the set.
     def remove(self, key):
-        raise NotImplementedError(
-            'Removing keys from PrefixSet is not implemented.')
+        try:
+            node, _ = self._get_node(key)
+        except KeyError:
+            return 0
+
+        if node and node.children:
+            for child in node.children:
+                self.discard(child)
+        else:
+            node.children = {}
+            node.value = _SENTINEL
 
     def pop(self):
+        
         raise NotImplementedError(
             'Removing keys from PrefixSet is not implemented.')
