@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
-"""trie module example code."""
+"""trie module example code.
+"""
 
 __author__ = 'Michal Nazarewicz <mina86@mina86.com>'
 __copyright__ = 'Copyright 2014 Google Inc.'

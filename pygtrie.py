@@ -1185,6 +1185,114 @@ class CharTrie(Trie):
     def _key_from_path(self, path):
         return ''.join(path)
 
+    def _dfs(self, node=None, level=0):
+        """
+        Traverses the Trie object in a depth first manner, required by the :function:
+        `CharTrie.graphic_view()`.
+        :parameter node: The trie node from which the traversal should begin (exclusive).
+        :parameter level: Distance of the current node from root node, required in
+        generating HTML list structure.
+        :return: None
+        """
+
+        # default node is the root of the CharTrie
+        if node is None:
+            node = self._root
+
+        """:function: `CharTrie._dfs()` is a recursive function, the provided node is 
+        traversed in the previous iteration. Therefore, if the node has no children, the
+        function call ends.
+        """
+        if len(node.children.keys()) == 0:
+            return
+
+        for key, value in node.children.items():
+
+            # if the node path is a valid key, yield the value to be displayed
+            # in the graphic view
+            if value.value != _SENTINEL:
+                yield (key, level, value.value)
+
+            else:
+                yield (key, level)
+
+            # traverse children of the current node before traversing the sibligs
+            # in depth first manner
+            yield from self._dfs(node=value, level=level+1)
+
+        return
+
+    def graphic_view(self):
+        """creates an HTML view of the CharTrie object in a file named,
+        chartrie_graphic_view.html
+
+        It can be used during debugging or in applications like competitive
+        programming where close interaction with data is required.
+
+        Uses DFS traversal result and converts it into a graphical view using
+        HTML lists.
+        """
+        dfs_sequence = [data_level_tuple for data_level_tuple in self._dfs()]
+
+        # the HTML list structure of the CharTrie object is created in the file
+        # 'chartrie_graphic_view.html'
+
+        with open('chartrie_graphic_view.html', 'w') as html_file:
+            html_file.write('<ul>')
+
+            for index in range(0, len(dfs_sequence)-1):
+                """if a node has lower `level` than it's succeeding node, the succeeding 
+                node is a child of the node, and should be placed in a sub-list.
+                
+                if a node has same `level` as it's succeeding node, the succeeding node 
+                is a sibling of the node, and should be placed in the same list as the
+                node.
+                
+                if a node has higher `level` than it's succeeding node, the succeeding 
+                node should be placed in one of the super-lists of the node. 
+                """
+                if dfs_sequence[index+1][1] > dfs_sequence[index][1]:
+                    html_file.write('<li>' + dfs_sequence[index][0])
+
+                    # if node path represents a key, show it's value in the graphical view
+                    if len(dfs_sequence[index]) == 3:
+                        html_file.write(' -> ' + str(dfs_sequence[index][2]))
+
+                    html_file.write('<ul>')
+
+                elif dfs_sequence[index+1][1] == dfs_sequence[index][1]:
+                    html_file.write('<li>' + dfs_sequence[index][0])
+
+                    if len(dfs_sequence[index]) == 3:
+                        html_file.write(' -> ' + str(dfs_sequence[index][2]))
+
+                    html_file.write('</li>')
+
+                else:
+                    html_file.write('<li>' + dfs_sequence[index][0])
+
+                    if len(dfs_sequence[index]) == 3:
+                        html_file.write(' -> ' + str(dfs_sequence[index][2]))
+
+                    html_file.write('</li>')
+                    s = ''
+
+                    # if current node as `level` A, and succeeding node has `level` B
+                    # the succeeding node will below to the (A-B)th super-list of node.
+                    for i in range(0, dfs_sequence[index][1] - dfs_sequence[index+1][1]):
+                        s += '</ul></li>'
+
+                    html_file.write(s)
+                    index -= 1
+
+            # add the last node and terminate the nested list structure
+            html_file.write('<li>' + dfs_sequence[-1][0])
+
+            if len(dfs_sequence[-1]) == 3:
+                html_file.write(' -> ' + str(dfs_sequence[-1][2]))
+
+            html_file.write('</li></ul></li></ul>')
+
 
 class StringTrie(Trie):
     """:class:`pygtrie.Trie` variant accepting strings with a separator as keys.
