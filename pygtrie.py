@@ -139,6 +139,11 @@ class _Node(object):
         """
         def children():
             """Recursively traverses all of node's children."""
+
+            # Don't iterate over children if there aren't any
+            if not self.children:
+                return
+
             for step, node in iteritems(self.children):
                 yield node.traverse(node_factory, path_conv, path + [step],
                                     iteritems)
