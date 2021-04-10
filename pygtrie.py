@@ -39,7 +39,10 @@ __author__ = 'Michal Nazarewicz <mina86@mina86.com>'
 __copyright__ = 'Copyright 2014 Google Inc.'
 
 
-import collections as _collections
+try:
+    import collections.abc as _collections
+except ImportError:
+    import collections as _collections
 
 # Python 2.x and 3.x compatibility stuff
 if hasattr(dict, 'iteritems'):
